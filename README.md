@@ -79,6 +79,54 @@ Use `nwg-displays` (GUI) to configure your monitors. It will generate
 
 ---
 
+## Gaming
+
+### Additional packages
+
+These are not included in `packages.txt` and must be installed manually:
+
+```bash
+sudo pacman -S gamemode mangohud
+```
+
+- `gamemode` — CPU/system-level performance optimizations (by Feral Interactive)
+- `mangohud` — in-game performance overlay (FPS, CPU, GPU, VRAM)
+
+### Hyprland gamemode
+
+ArchStoso includes a built-in script that disables compositor effects for maximum performance:
+
+- Disables animations, blur, shadows
+- Removes window gaps and rounding
+- Restores everything when toggled off
+
+**Keybind:** `Super + Alt + G`
+
+You will get a desktop notification when it activates and deactivates.
+
+### Steam launch options
+
+Add this to each game's launch options in Steam (**Properties → General → Launch Options**):
+
+```
+~/.config/hypr/scripts/gamemode.sh && prime-run gamemoderun mangohud %command% ; ~/.config/hypr/scripts/gamemode.sh
+```
+
+What each part does:
+
+| Part | What it does |
+|------|-------------|
+| `~/.config/hypr/scripts/gamemode.sh` (first) | Disables Hyprland compositor effects before the game starts |
+| `prime-run` | Runs the game on the dedicated NVIDIA GPU (Optimus laptops) |
+| `gamemoderun` | Applies system-level optimizations via the gamemode daemon |
+| `mangohud` | Shows the performance overlay in-game |
+| `%command%` | The actual game |
+| `~/.config/hypr/scripts/gamemode.sh` (last) | Re-enables compositor effects after the game exits |
+
+> Remove `prime-run` if you are on a desktop with only one GPU.
+
+---
+
 ## Packages
 
 73 packages total — 66 from pacman, 7 from AUR. See [`dotfiles/packages.txt`](dotfiles/packages.txt) for the full list.

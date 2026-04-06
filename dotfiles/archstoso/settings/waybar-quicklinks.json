@@ -1,0 +1,43 @@
+/*
+Define your quick links for the statusbar here.
+You can use icons from here https://fontawesome.com/search?ic=free
+You can reload waybar with SUPER + SHIFT + B
+*/
+{
+    "custom/quicklink_browser": {
+        "format": "",
+        "on-click": "$BROWSER",
+        "tooltip-format": "Open Browser"
+    },
+    "custom/quicklink_filemanager": {
+        "format": "",
+        "on-click": "$FILE_MANAGER",
+        "tooltip-format": "Open Filemanager"
+    },
+    "custom/quicklink_calculator": {
+        "format": "",
+        "on-click": "~/.config/archstoso/settings/calculator.sh",
+        "tooltip-format": "Open calculator"
+    },
+/*
+Don't remove the quicklinkempty
+*/
+    "custom/quicklinkempty": {
+    },
+/*
+Add your quicklinks in your desired order to the status bar
+*/
+    "group/quicklinks": {
+        "orientation": "horizontal",
+        "modules": [
+
+            "custom/quicklink_browser",
+            "custom/quicklink_filemanager",
+
+/*
+Don't remove the quicklinkempty
+*/
+            "custom/quicklinkempty"
+        ]
+    }
+}

@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+#  ____  _          _ _
+# / ___|| |__   ___| | |
+# \___ \| '_ \ / _ \ | |
+#  ___) | | | |  __/ | |
+# |____/|_| |_|\___|_|_|
+#
+
+sleep 1
+
+clear
+figlet -f smslant "Shell"
+
+echo ":: Setting bash as the default shell"
+echo
+
+# Change shell to bash
+while ! chsh -s $(which bash); do
+    echo "ERROR: Authentication failed. Please enter the correct password."
+    sleep 1
+done
+echo ":: Shell is now bash."
+
+# Installing oh-my-posh
+echo ":: Installing Oh My Posh..."
+curl -s https://ohmyposh.dev/install.sh | bash -s
+
+echo
+echo ":: Done! Please reboot your system."
+echo "Press [ENTER] to close."
+read

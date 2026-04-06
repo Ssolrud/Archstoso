@@ -1,0 +1,179 @@
+# ArchStoso packages
+# One package per line.
+# Lines beginning with '#' are comments and are ignored by install.sh.
+# AUR packages are marked with [AUR] — install.sh handles both via the
+# detected AUR helper (yay or paru).
+
+# ------------------------------------------------------------------
+# Core utilities (pacman)
+# ------------------------------------------------------------------
+base-devel
+git
+curl
+wget
+rsync
+unzip
+tar
+jq
+inotify-tools
+xdg-user-dirs
+
+# ------------------------------------------------------------------
+# Hyprland + Wayland core (pacman)
+# ------------------------------------------------------------------
+hyprland
+uwsm
+xdg-desktop-portal-hyprland
+xdg-desktop-portal-gtk
+qt5-wayland
+qt6-wayland
+libnotify
+polkit-gnome
+
+# ------------------------------------------------------------------
+# Hyprland ecosystem (pacman)
+# ------------------------------------------------------------------
+hyprlock
+hypridle
+hyprpicker
+
+# ------------------------------------------------------------------
+# Status bar (pacman)
+# ------------------------------------------------------------------
+waybar
+
+# ------------------------------------------------------------------
+# Terminal (pacman)
+# ------------------------------------------------------------------
+kitty
+
+# ------------------------------------------------------------------
+# Notification daemon (pacman)
+# ------------------------------------------------------------------
+swaync
+
+# ------------------------------------------------------------------
+# Screenshot tools (pacman)
+# ------------------------------------------------------------------
+grim
+slurp
+
+# ------------------------------------------------------------------
+# Clipboard (pacman)
+# ------------------------------------------------------------------
+cliphist
+wl-clipboard
+
+# ------------------------------------------------------------------
+# Brightness control (pacman)
+# ------------------------------------------------------------------
+brightnessctl
+
+# ------------------------------------------------------------------
+# Audio (pacman)
+# ------------------------------------------------------------------
+pipewire
+pipewire-alsa
+pipewire-pulse
+wireplumber
+pavucontrol
+
+# ------------------------------------------------------------------
+# Network (pacman)
+# ------------------------------------------------------------------
+networkmanager
+nm-connection-editor
+network-manager-applet
+
+# ------------------------------------------------------------------
+# Bluetooth (pacman)
+# ------------------------------------------------------------------
+blueman
+
+# ------------------------------------------------------------------
+# File manager support (pacman)
+# ------------------------------------------------------------------
+gvfs
+gvfs-mtp
+udisks2
+udiskie
+tumbler
+
+# ------------------------------------------------------------------
+# GTK / Qt theming (pacman)
+# ------------------------------------------------------------------
+nwg-look
+gnome-themes-extra
+breeze
+qt6ct
+qt6-svg
+
+# ------------------------------------------------------------------
+# Fonts (pacman)
+# ------------------------------------------------------------------
+ttf-font-awesome
+otf-font-awesome
+ttf-fira-sans
+ttf-firacode-nerd
+ttf-jetbrains-mono-nerd
+
+# ------------------------------------------------------------------
+# System monitors / info (pacman)
+# ------------------------------------------------------------------
+btop
+fastfetch
+
+# ------------------------------------------------------------------
+# Editor (pacman)
+# ------------------------------------------------------------------
+neovim
+
+# ------------------------------------------------------------------
+# Image viewer (pacman)
+# ------------------------------------------------------------------
+loupe
+
+# ------------------------------------------------------------------
+# Miscellaneous utilities (pacman)
+# ------------------------------------------------------------------
+figlet
+fzf
+imagemagick
+python-gobject
+python-pip
+pacman-contrib
+
+# ------------------------------------------------------------------
+# AUR packages — installed via yay/paru
+# Marked with [AUR]
+# ------------------------------------------------------------------
+
+# Launcher (replaces Rofi) + required elephant providers
+walker-bin                  # [AUR]
+elephant-desktopapplications      # [AUR] - scans .desktop files for Walker app list
+elephant-websearch                # [AUR] - websearch provider used in config.toml
+elephant-providerlist             # [AUR] - providerlist provider used in config.toml
+
+# Color scheme generator
+matugen-bin                 # [AUR]
+
+# Shell prompt
+oh-my-posh-bin              # [AUR]
+
+# Screenshot helper (grimblast wraps grim+slurp with Hyprland support)
+grimblast-git               # [AUR]
+
+# Hyprland shader tool
+hyprshade                   # [AUR]
+
+# Display layout GUI
+nwg-displays                # [AUR]
+
+# Wallpaper GUI frontend (used by archstoso scripts)
+waypaper                    # [AUR]
+
+# Wallpaper daemon
+swww                        # [AUR]
+
+# Power / logout menu
+wlogout                     # [AUR]

@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+# ArchStoso autostart script
+# Runs on Hyprland startup via exec-once in hyprland.conf
+
+# ------------------------------------------------------
+# First-run notice (guarded by cache sentinel file)
+# ------------------------------------------------------
+# The sentinel file is written by the install script on first setup.
+# Deleting ~/.cache/archstoso-welcome-autostart re-enables the notice.
+
+if [ ! -f "$HOME/.cache/archstoso-welcome-autostart" ]; then
+    echo ":: ArchStoso first-run notice triggered."
+    # Placeholder: replace with a welcome notification or script when ready.
+    # e.g.: notify-send "Welcome to ArchStoso" "Your desktop is ready."
+    touch "$HOME/.cache/archstoso-welcome-autostart"
+else
+    echo ":: ArchStoso autostart: first-run notice already shown, skipping."
+fi
+
+echo ":: ArchStoso autostart complete."

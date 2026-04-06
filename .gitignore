@@ -1,0 +1,6 @@
+# Reference folders — not part of ArchStoso, excluded from repo
+ArchTitus/
+mylinuxforwork-dotfiles/
+
+# Claude internal files
+.claude/

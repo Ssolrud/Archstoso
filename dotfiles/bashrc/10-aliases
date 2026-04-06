@@ -1,0 +1,19 @@
+# -----------------------------------------------------
+# Aliases
+# -----------------------------------------------------
+
+# Navigation
+alias ..='cd ..'
+alias c='clear'
+
+# Editor
+alias v='$EDITOR'
+alias vim='$EDITOR'
+
+# System
+alias shutdown='systemctl poweroff'
+alias lock='hyprlock'
+
+# Fetch
+alias nf='fastfetch'
+alias ff='fastfetch'

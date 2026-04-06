@@ -1,0 +1,2564 @@
+================================================================================
+                    COMPREHENSIVE REPOSITORY REVIEW
+              ArchTitus vs ML4W Dotfiles for Hyprland
+================================================================================
+
+Date: February 15, 2026
+Reviewed by: ArchLinux-Hyprland Expert
+
+================================================================================
+                        TABLE OF CONTENTS
+================================================================================
+
+1. Executive Summary
+2. ArchTitus - Automated Arch Linux Installer
+   2.1 Project Overview
+   2.2 Directory Structure
+   2.3 Installation Process & Workflow
+   2.4 Major Components & Scripts
+   2.5 Package Lists & Desktop Environments
+   2.6 Configuration Files & Theming
+   2.7 Target Audience
+   2.8 Maintenance Status
+3. ML4W Dotfiles for Hyprland
+   3.1 Project Overview
+   3.2 Directory Structure
+   3.3 Installation Process & Workflow
+   3.4 Major Components & Features
+   3.5 Package Dependencies
+   3.6 Configuration System
+   3.7 Target Audience
+   3.8 Maintenance Status
+4. Side-by-Side Comparison
+   4.1 Feature Comparison Matrix
+   4.2 Package Overlap Analysis
+   4.3 Philosophy & Approach Differences
+   4.4 Use Case Scenarios
+5. Can They Be Used Together?
+6. Pros and Cons
+7. Recommendations
+
+================================================================================
+1. EXECUTIVE SUMMARY
+================================================================================
+
+ArchTitus and ML4W Dotfiles are fundamentally different projects serving
+distinct purposes in the Arch Linux ecosystem:
+
+ARCHTITUS: A bare-metal automated Arch Linux installer that handles disk
+partitioning, base system installation, bootloader setup, and optional
+desktop environment deployment. It's designed to run from a live ISO and
+install a complete Arch system from scratch.
+
+ML4W DOTFILES: A sophisticated, feature-rich Hyprland configuration and
+dotfiles package designed to be installed ON TOP of an existing Arch-based
+distribution. It transforms an existing system into a polished Hyprland
+desktop environment with advanced theming, automation, and customization.
+
+KEY DISTINCTION: ArchTitus INSTALLS the OS. ML4W CONFIGURES the desktop.
+
+
+================================================================================
+2. ARCHTITUS - AUTOMATED ARCH LINUX INSTALLER
+================================================================================
+
+2.1 PROJECT OVERVIEW
+------------------------------------------------------------
+
+Project Name: ArchTitus
+Author: Chris Titus (ChrisTitusTech)
+GitHub: https://github.com/ChrisTitusTech/ArchTitus
+Current Status: DEPRECATED - Project moved to LinUtil
+Purpose: Automated bare-metal Arch Linux installation script
+
+IMPORTANT NOTE: The README.md states this project has been discontinued and
+incorporated into LinUtil (https://github.com/ChrisTitusTech/linutil). However,
+the repository still contains a complete, functional installer as of the last
+commit.
+
+Core Function:
+- Automates the entire Arch Linux installation process
+- Handles disk partitioning, filesystem creation, and base system setup
+- Installs bootloader (GRUB) with custom theming
+- Optionally installs and configures desktop environments
+- Creates user accounts and applies system configurations
+
+
+2.2 DIRECTORY STRUCTURE
+------------------------------------------------------------
+
+ArchTitus/
+├── archtitus.sh          # Main entry point script
+├── scripts/              # Installation phase scripts
+│   ├── startup.sh        # User input gathering (TUI menu system)
+│   ├── 0-preinstall.sh   # Disk partitioning & base install
+│   ├── 1-setup.sh        # System configuration & packages
+│   ├── 2-user.sh         # User setup & AUR packages
+│   ├── 3-post-setup.sh   # Finalization & theming
+│   ├── curl-install.sh   # Remote installation wrapper
+│   ├── kderice-backup.sh # KDE configuration backup
+│   └── kderice-restore.sh # KDE configuration restore
+├── configs/              # System configuration files
+│   ├── setup.conf        # Generated config from user input
+│   ├── .bashrc           # Bash shell configuration
+│   ├── .config/          # User-level configs (kitty)
+│   ├── boot/grub/themes/ # CyberRe GRUB theme
+│   ├── etc/              # System configs (snapper)
+│   ├── usr/share/plymouth/ # arch-glow boot splash theme
+│   └── kde.knsv          # KDE Konsave theme package
+└── pkg-files/            # Package lists for each DE
+    ├── pacman-pkgs.txt   # Base system packages (113 lines)
+    ├── aur-pkgs.txt      # AUR packages for full install
+    ├── hypr.txt          # Hyprland-specific packages
+    ├── kde.txt           # KDE Plasma packages
+    ├── gnome.txt         # GNOME packages
+    ├── awesome.txt       # AwesomeWM packages
+    ├── cinnamon.txt      # Cinnamon packages
+    ├── dwm.txt           # DWM packages
+    └── server.txt        # Server (no GUI) packages
+
+
+2.3 INSTALLATION PROCESS & WORKFLOW
+------------------------------------------------------------
+
+Phase 0: Startup (startup.sh)
+- Runs system checks (root, Arch ISO, pacman availability)
+- Interactive TUI menu system for user configuration:
+  * Username & password
+  * Hostname
+  * Desktop Environment selection (KDE, GNOME, Hyprland, Awesome, etc.)
+  * AUR helper choice (yay, paru, picaur, aura, trizen, pacaur, none)
+  * Installation type (FULL vs MINIMAL)
+  * Disk selection with warning dialog
+  * Filesystem type (btrfs, ext4, luks)
+  * SSD optimization options
+  * Timezone detection (via ipapi.co)
+  * Keyboard layout selection
+- Saves all choices to configs/setup.conf
+
+Phase 1: Preinstall (0-preinstall.sh)
+- Updates archlinux-keyring
+- Configures pacman (parallel downloads)
+- Sets up country-specific mirrors using reflector
+- Disk partitioning with sgdisk:
+  * Partition 1: 1M BIOS boot partition (ef02)
+  * Partition 2: 300M EFI boot partition (ef00)
+  * Partition 3: Remaining space for root (8300)
+- Filesystem creation based on user choice:
+  * btrfs: Creates subvolumes (@, @home, @var, @tmp, @.snapshots)
+  * ext4: Standard ext4 filesystem
+  * luks: Encrypted btrfs with LUKS container
+- Mounts filesystem hierarchy
+- Pacstraps base system (base, base-devel, linux, linux-firmware)
+- Generates fstab
+- GRUB installation for BIOS systems
+- Creates swap file for systems <8GB RAM
+
+Phase 2: Setup (1-setup.sh) - Runs in chroot
+- Enables NetworkManager
+- Optimizes makepkg.conf for multi-core compilation
+- Sets locale to en_US.UTF-8
+- Configures timezone and keymap
+- Enables sudo for wheel group (NOPASSWD during install)
+- Enables multilib repository
+- Installs base packages from pacman-pkgs.txt:
+  * Respects MINIMAL/FULL installation type
+  * Stops at "--END OF MINIMAL INSTALL--" marker for minimal
+- CPU microcode detection and installation (Intel/AMD)
+- GPU driver detection and installation:
+  * NVIDIA: nvidia package + nvidia-xconfig
+  * AMD: xf86-video-amdgpu
+  * Intel: Full VA-API and Vulkan stack
+- Creates user account and adds to wheel & libvirt groups
+- Configures LUKS hooks in mkinitcpio if encrypted
+
+Phase 3: User (2-user.sh) - Runs as target user
+- Sets up zsh configuration from ChrisTitusTech/zsh repo
+- Installs powerlevel10k theme
+- Installs desktop environment packages from pkg-files/{DE}.txt
+- Installs AUR helper (if selected)
+- Installs AUR packages from aur-pkgs.txt
+- Applies KDE theming if FULL install selected:
+  * Uses Konsave to apply pre-packaged theme
+  * Nordic theme integration
+
+Phase 4: Post-Setup (3-post-setup.sh) - Runs in chroot as root
+- Installs GRUB bootloader for UEFI systems
+- Configures GRUB:
+  * Adds cryptdevice parameter for LUKS
+  * Adds splash screen parameter
+  * Applies CyberRe GRUB theme
+- Enables display manager based on DE:
+  * KDE: SDDM with Nordic theme (if FULL)
+  * GNOME: GDM
+  * Others: LightDM with gtk-greeter
+- Enables essential services:
+  * cups (printing)
+  * ntpd (time sync)
+  * NetworkManager
+  * bluetooth
+  * avahi-daemon
+- Configures Snapper for btrfs/luks snapshots
+- Installs Plymouth boot splash (arch-glow theme)
+- Removes NOPASSWD from sudoers and re-enables password requirement
+- Cleans up installation files
+
+
+2.4 MAJOR COMPONENTS & SCRIPTS
+------------------------------------------------------------
+
+Interactive Menu System (startup.sh):
+- Custom select_option() function with vim-style navigation (hjkl)
+- Multi-column display support
+- Keyboard layout options: us, by, ca, cf, cz, de, dk, es, et, fa, fi,
+  fr, gr, hu, il, it, lt, lv, mk, nl, no, pl, ro, ru, sg, ua, uk
+
+Filesystem Support:
+- btrfs with subvolumes and optimized mount options
+  * Mount options: noatime,compress=zstd,ssd,commit=120 (SSD)
+  * Mount options: noatime,compress=zstd,commit=120 (HDD)
+  * Subvolumes: @, @home, @var, @tmp, @.snapshots
+- ext4 with standard options
+- LUKS encryption with btrfs inside encrypted container
+
+Theming Components:
+- CyberRe GRUB theme (custom graphics and fonts)
+- arch-glow Plymouth theme (animated boot splash)
+- Nordic theme for KDE (via Konsave package)
+- Kitty terminal with kitty-themes collection (200+ themes)
+
+Snapshot Support:
+- Snapper configuration for btrfs/luks
+- Config files in configs/etc/snapper/configs/root
+- snap-pac integration for automatic pacman snapshots
+
+
+2.5 PACKAGE LISTS & DESKTOP ENVIRONMENTS
+------------------------------------------------------------
+
+Supported Desktop Environments:
+1. KDE Plasma (plasma-desktop + full KDE stack)
+2. GNOME (gnome + gnome-extra)
+3. Hyprland (Wayland tiling compositor)
+4. AwesomeWM (X11 tiling window manager)
+5. Cinnamon (Traditional desktop)
+6. DWM (Suckless tiling WM)
+7. Server (no GUI)
+
+Base System Packages (pacman-pkgs.txt - MINIMAL):
+- Graphics: mesa, xorg, xorg-server, xorg-apps, xorg-drivers
+- Core: base-devel, linux-headers
+- Fonts: noto-fonts-emoji
+- Utils: dosfstools, usbutils, xdg-user-dirs
+
+Full Install Additional Packages (113 total):
+- Audio: alsa-plugins, alsa-utils, pulseaudio, pulseaudio-bluetooth
+- Development: code (VSCode), jdk-openjdk, gcc, make, git
+- Graphics: gimp, gparted, grub-customizer
+- Gaming: steam, lutris, gamemode, wine-gecko, wine-mono, winetricks
+- Virtualization: qemu, virt-manager, virt-viewer, libvirt
+- Media: celluloid (MPV frontend), gst-plugins-*
+- Terminal: kitty with custom config and 200+ themes
+- Utilities: htop, neofetch, btop, cmatrix
+- Compression: p7zip, unrar, unzip, zip, lzop
+- Fonts: ttf-droid, ttf-hack, ttf-roboto, awesome-terminal-fonts,
+  powerline-fonts, terminus-font
+- Theming: papirus-icon-theme
+- Security: ufw (firewall)
+- Snapshot: snapper, snap-pac, snapper-gui-git (AUR)
+
+Hyprland Packages (hypr.txt - 42 packages):
+- Core: hyprland, polkit-gnome
+- Wayland: wl-clipboard, wf-recorder, swaybg
+- Screenshot: grimblast-git
+- Bar: waybar-hyprland
+- Logout: wlogout
+- Lock: swaylock-effects
+- Display Manager: sddm-git
+- Utils: pavucontrol, playerctl, brightnessctl, hyprpicker-git
+- File Manager: thunar + plugins (archive, ffmpeg thumbnails)
+- Apps: kitty, rofi, neovim, viewnior
+- Audio: pamixer, noise-suppression-for-voice
+- Theming: nwg-look-bin, nordic-theme, papirus-icon-theme, dunst
+- Fonts: otf-sora, ttf-nerd-fonts-symbols-common, otf-firamono-nerd,
+  inter-font, ttf-fantasque-nerd, noto-fonts, noto-fonts-emoji,
+  ttf-comfortaa, ttf-jetbrains-mono-nerd, ttf-icomoon-feather,
+  ttf-iosevka-nerd, adobe-source-code-pro-fonts
+- Shell: starship prompt
+
+AUR Packages (aur-pkgs.txt - 22 packages):
+- Browser: brave-bin
+- KDE Theming: nordic-darker-theme, nordic-kde-git, nordic-theme,
+  lightly-git, lightlyshaders-git, sddm-nordic-theme-git
+- Utils: autojump, github-desktop-bin, ocs-url, zoom
+- Gaming: dxvk-bin, mangohud, mangohud-common
+- Fonts: nerd-fonts-fira-code, ttf-meslo
+- Plymouth: plymouth-git
+- Snapshots: snapper-gui-git
+- VM: vde2, bridge-utils
+
+KDE Packages (kde.txt - 40 packages):
+- Minimal: plasma-desktop, sddm, dolphin
+- Full: Complete KDE suite including ark, gwenview, kate, konsole,
+  okular, spectacle, kgpg, discover, kvantum-qt5, etc.
+
+
+2.6 CONFIGURATION FILES & THEMING
+------------------------------------------------------------
+
+Included Configurations:
+- .bashrc: Custom bash configuration
+- Kitty: Full terminal config + 200+ theme collection
+- GRUB: CyberRe theme (custom fonts, background, menu styling)
+- Plymouth: arch-glow animated boot splash
+- Snapper: Automated snapshot configuration
+- KDE: Konsave backup (kde.knsv) with Nordic theme
+
+Boot Theming:
+- GRUB CyberRe theme features:
+  * Custom background.png
+  * Custom boot menu graphics
+  * DroidLogo and DejaVu fonts in multiple weights
+  * Highlight and progress animations
+
+- Plymouth arch-glow theme:
+  * 19 progress frames (00-18)
+  * 16 throbber frames (00-15)
+  * Custom lock, box, bullet, entry graphics
+  * Integrated into initramfs
+
+
+2.7 TARGET AUDIENCE
+------------------------------------------------------------
+
+Primary Users:
+- Newcomers to Arch Linux wanting automated installation
+- Users familiar with Linux but not with manual Arch installation
+- People wanting a quick, preconfigured Arch setup
+- Content creators/streamers needing consistent Arch installs
+- Those who want a "guided" Arch experience vs pure manual install
+
+Technical Level: Beginner to Intermediate
+- Abstracts away manual partitioning and pacstrap
+- Provides sane defaults and visual confirmations
+- Requires basic understanding of filesystems and partitioning concepts
+- Still requires reading warnings and understanding destructive operations
+
+NOT for:
+- Advanced users who want complete control over every detail
+- Production servers (although server option exists)
+- Users who want to learn the manual Arch installation process
+- Systems requiring complex partition layouts or dual-boot
+
+
+2.8 MAINTENANCE STATUS
+------------------------------------------------------------
+
+Repository Status: DEPRECATED/ARCHIVED
+- Last significant commits: 2024-2025 timeframe
+- README explicitly states project moved to LinUtil
+- Code appears complete and functional as-is
+- No active development or issue tracking
+
+LinUtil Integration:
+- Project functionality incorporated into Chris Titus's LinUtil
+- LinUtil is a general Linux utility tool, not Arch-specific
+- Available at: https://github.com/ChrisTitusTech/linutil
+
+Recommendation:
+- Existing code can still be used but may not receive updates
+- For ongoing support, investigate LinUtil
+- May not be compatible with future Arch changes
+- Hyprland packages may be outdated (using waybar-hyprland, sddm-git)
+
+
+================================================================================
+3. ML4W DOTFILES FOR HYPRLAND
+================================================================================
+
+3.1 PROJECT OVERVIEW
+------------------------------------------------------------
+
+Project Name: ML4W OS - Dotfiles for Hyprland
+Author: Stephan Raabe (mylinuxforwork)
+GitHub: https://github.com/mylinuxforwork/dotfiles
+Current Version: 2.10.1 (Rolling Release) / 2.10.1 (Stable Release)
+Project Website: https://ml4w.com/os/
+Documentation: https://ml4w.com/os/ (formerly mylinuxforwork.github.io)
+
+Purpose:
+- Advanced, feature-rich Hyprland desktop environment configuration
+- Complete dotfiles package for Arch-based distributions
+- Adaptive material color theming system
+- Comprehensive app launcher, settings manager, and customization tools
+- Designed to transform existing Arch installs into polished Hyprland DE
+
+Key Philosophy:
+- "ML4W OS" - Treating dotfiles as a complete operating environment
+- Modular, theme-able, user-customizable
+- Material Design inspired with wallpaper-adaptive colors
+- Extensive documentation and user-friendly setup
+- Active development with regular updates
+
+
+3.2 DIRECTORY STRUCTURE
+------------------------------------------------------------
+
+mylinuxforwork-dotfiles/
+├── dotfiles/                 # Main configuration files
+│   └── .config/              # User-level configurations
+│       ├── hypr/             # Hyprland configuration
+│       │   ├── hyprland.conf # Main Hyprland config (74 lines)
+│       │   ├── hypridle.conf # Idle daemon config
+│       │   ├── hyprlock.conf # Lock screen config
+│       │   ├── hyprpaper.conf # Wallpaper daemon config
+│       │   ├── colors.conf   # Generated color scheme
+│       │   ├── conf/         # Modular config system
+│       │   │   ├── animation.conf    # Points to variations
+│       │   │   ├── animations/       # Animation variations
+│       │   │   ├── autostart.conf    # Startup programs
+│       │   │   ├── cursor.conf       # Cursor settings
+│       │   │   ├── custom.conf       # User customizations
+│       │   │   ├── decoration.conf   # Points to variations
+│       │   │   ├── decorations/      # Decoration variations
+│       │   │   ├── environment.conf  # Env variables
+│       │   │   ├── environments/     # Environment variations
+│       │   │   ├── keybinding.conf   # Points to variations
+│       │   │   ├── keybindings/      # Keybinding variations
+│       │   │   ├── keyboard.conf     # Keyboard layout
+│       │   │   ├── layout.conf       # Window layout
+│       │   │   ├── layouts/          # Layout variations
+│       │   │   ├── misc.conf         # Misc Hyprland settings
+│       │   │   ├── ml4w.conf         # ML4W-specific configs
+│       │   │   ├── monitor.conf      # Monitor config
+│       │   │   ├── monitors/         # Monitor variations
+│       │   │   ├── window.conf       # Window settings
+│       │   │   ├── windowrule.conf   # Window rules
+│       │   │   ├── windowrules/      # Window rule variations
+│       │   │   ├── workspace.conf    # Workspace settings
+│       │   │   └── workspaces/       # Workspace variations
+│       │   ├── effects/          # Hyprshade effects
+│       │   ├── scripts/          # Hyprland helper scripts
+│       │   ├── assets/           # Icons and graphics
+│       │   ├── monitors.conf     # Legacy monitor config
+│       │   └── workspaces.conf   # Legacy workspace config
+│       ├── waybar/               # Status bar configuration
+│       │   ├── modules.json      # Waybar module definitions
+│       │   ├── colors.css        # Generated color CSS
+│       │   ├── launch.sh         # Waybar launcher script
+│       │   ├── themeswitcher.sh  # Theme switching utility
+│       │   ├── toggle.sh         # Toggle script
+│       │   └── themes/           # Waybar theme variations
+│       │       ├── ml4w/         # Modern ML4W theme
+│       │       ├── ml4w-minimal/ # Minimal theme
+│       │       ├── glass-center/ # Glass theme centered
+│       │       ├── modern-walker/# Modern with Walker
+│       │       ├── starter/      # Starter template
+│       │       └── transparent/  # Transparent theme
+│       ├── ml4w/                 # ML4W custom apps & scripts
+│       │   ├── bin/              # User-facing scripts
+│       │   │   ├── ml4w-apps.sh         # App launcher
+│       │   │   ├── ml4w-finder.sh       # Fuzzy finder
+│       │   │   ├── ml4w-quicklinks.sh   # Quick links
+│       │   │   ├── ml4w-screenshot.sh   # Screenshot tool
+│       │   │   └── ml4w-wallpaper.sh    # Wallpaper selector
+│       │   ├── scripts/          # System scripts
+│       │   │   ├── arch/         # Arch-specific scripts
+│       │   │   │   ├── pacman.sh        # Package manager
+│       │   │   │   ├── snapshot.sh      # Timeshift snapshots
+│       │   │   │   ├── cleanup.sh       # System cleanup
+│       │   │   │   ├── installprinters.sh
+│       │   │   │   └── installtimeshift.sh
+│       │   ├── listeners/        # Event listener scripts
+│       │   │   ├── gtk-theme-switcher.sh
+│       │   │   └── low-bat-notification.sh
+│       │   ├── listeners.sh      # Main listener daemon
+│       │   ├── themes/           # Global theme system
+│       │   │   ├── modern/       # Modern theme
+│       │   │   ├── glass-walker/ # Glass theme
+│       │   │   └── modern-walker/# Modern Walker theme
+│       │   ├── settings/         # User settings storage
+│       │   ├── colors/           # Color scheme storage
+│       │   ├── assets/           # ML4W assets
+│       │   ├── tpl/              # Template files
+│       │   ├── wallpapers/       # Default wallpapers
+│       │   ├── library.sh        # Shared functions
+│       │   └── version.json      # Version tracking
+│       ├── rofi/                 # Application launcher
+│       ├── swaync/               # Notification center
+│       ├── wlogout/              # Logout menu
+│       ├── walker/               # Walker launcher (optional)
+│       ├── kitty/                # Terminal emulator config
+│       ├── fastfetch/            # System info tool
+│       ├── btop/                 # System monitor
+│       ├── matugen/              # Color generator config
+│       ├── nwg-dock-hyprland/    # Application dock
+│       ├── sidepad/              # Side panel utility
+│       ├── waypaper/             # Wallpaper manager
+│       ├── gtk-3.0/              # GTK3 theme
+│       ├── gtk-4.0/              # GTK4 theme
+│       ├── qt6ct/                # Qt6 configuration
+│       ├── nvim/                 # Neovim config
+│       ├── vim/                  # Vim config
+│       ├── ohmyposh/             # Oh My Posh prompt
+│       ├── fish/                 # Fish shell config
+│       ├── bashrc/               # Bash config
+│       ├── zshrc/                # Zsh config
+│       └── xsettingsd/           # X settings daemon
+├── setup/                        # Installation system
+│   ├── setup.sh                  # Main setup dispatcher
+│   ├── setup-arch.sh             # Arch Linux setup
+│   ├── setup-fedora.sh           # Fedora setup
+│   ├── setup-opensuse.sh         # OpenSuse setup
+│   ├── dependencies.sh           # Show dependencies
+│   ├── pkgs.sh                   # General package lists
+│   ├── packages/                 # Prebuilt binaries
+│   │   ├── matugen               # Color generator binary
+│   │   └── eza                   # ls replacement binary
+│   ├── dependencies/             # Dependency specifications
+│   │   ├── packages              # Generic package list
+│   │   ├── packages-arch         # Arch-specific packages
+│   │   ├── packages-fedora       # Fedora packages
+│   │   ├── packages-opensuse     # OpenSuse packages
+│   │   ├── preflight-arch.sh     # Arch preflight checks
+│   │   ├── preflight-fedora.sh   # Fedora preflight
+│   │   └── preflight-opensuse.sh # OpenSuse preflight
+│   ├── scripts/                  # Helper scripts
+│   ├── fonts/                    # Bundled fonts
+│   │   ├── FiraCode/             # Nerd Font patched
+│   │   ├── Fira_Sans/            # Fira Sans family
+│   │   └── Material-Icons/       # Material Design icons
+│   ├── cursors/                  # Cursor themes
+│   │   └── ArcAurora/            # Default cursor
+│   ├── icons/                    # Icon themes
+│   │   └── Colloid/              # Colloid icons
+│   ├── _fonts.sh                 # Font installation script
+│   ├── _cursors.sh               # Cursor installation
+│   ├── _icons.sh                 # Icon installation
+│   ├── _ml4w-apps.sh             # ML4W app installation
+│   ├── _flatpaks.sh              # Flatpak setup
+│   ├── _prebuilt.sh              # Prebuilt binary install
+│   └── _lib.sh                   # Shared functions
+├── hyprland-dotfiles.dotinst     # Dotfiles Installer config (rolling)
+├── hyprland-dotfiles-stable.dotinst # Stable release config
+├── CHANGELOG.md                  # Detailed version history
+├── README.md                     # Project overview
+├── CODE_OF_CONDUCT.md            # Community guidelines
+├── GEMINI.md                     # AI integration docs
+└── LICENSE                       # GPL-3.0 license
+
+
+3.3 INSTALLATION PROCESS & WORKFLOW
+------------------------------------------------------------
+
+Installation Method 1: ML4W Dotfiles Installer (Recommended)
+- Flatpak application: com.ml4w.dotfiles
+- Available on Flathub
+- GUI-based installation and configuration
+- URL-based installation from GitHub
+- Two channels:
+  * Stable: hyprland-dotfiles-stable.dotinst
+  * Rolling: hyprland-dotfiles.dotinst
+
+Installation Method 2: Manual Script Execution
+- Clone repository
+- Run setup/setup.sh
+- Auto-detects distribution (Arch/Fedora/OpenSuse)
+- Executes appropriate setup script
+
+Setup Process (setup-arch.sh):
+
+1. Dependency Check & Installation
+   - Installs gum (TUI framework) if not present
+   - Checks for AUR helper (yay or paru)
+   - If neither found, prompts user to select one
+   - Builds and installs selected AUR helper
+
+2. Package Installation
+   General packages (from pkgs.sh):
+   - Base: wget, curl, git, rsync, unzip, tar, jq
+   - Desktop: flatpak, vim, gnome-themes-extra
+   - File management: udisks2, gvfs, udiskie
+
+   Hyprland ecosystem (from pkgs.sh):
+   - hyprpaper, hyprlock, hypridle, hyprpicker
+   - xdg-desktop-portal-hyprland
+
+   Apps (from pkgs.sh):
+   - Terminals: kitty
+   - Launchers: rofi, walker (optional)
+   - Bar: waybar
+   - Logout: wlogout
+   - Dock: nwg-dock-hyprland
+   - Monitor config: nwg-displays
+   - Theme: nwg-look
+   - Media: vlc
+   - Audio: pavucontrol
+   - Editors: neovim, gnome-text-editor
+   - File manager: nautilus
+   - Network: blueman
+   - Qt: qt6ct
+   - Browser: firefox
+
+   Tools (from pkgs.sh):
+   - CLI: xdg-user-dirs, xdg-desktop-portal-gtk, figlet, fastfetch
+   - System: htop, btop
+   - Clipboard: xclip, wl-clipboard, cliphist
+   - Screenshot: grim, slurp
+   - Shell: zsh, fzf
+   - Utils: brightnessctl, tumbler, breeze, tesseract
+
+   Arch-specific packages (from setup-arch.sh):
+   - hyprland, libnotify, qt5-wayland, qt6-wayland
+   - uwsm (Wayland session manager)
+   - python-pip, python-gobject, python-screeninfo
+   - nm-connection-editor, network-manager-applet
+   - imagemagick, polkit-gnome
+   - hyprshade, grimblast-git (AUR)
+   - pacman-contrib, loupe, power-profiles-daemon
+   - waypaper, swaync
+   - eza, python-pywalfox, tesseract-data-eng
+   - otf-font-awesome, ttf-firacode-nerd, ttf-jetbrains-mono-nerd
+   - tty-clock, swww
+   - qt6-svg, qt6-virtualkeyboard, qt6-multimedia-ffmpeg
+   - gvfs-mtp
+
+3. Font Installation
+   - Bundled Fira Code Nerd Font
+   - Fira Sans family
+   - Material Design Icons
+   - Installed to ~/.local/share/fonts
+
+4. Cursor Theme Installation
+   - ArcAurora cursor theme (3 variants)
+   - Installed to ~/.local/share/icons
+
+5. Icon Theme Installation
+   - Colloid icon theme (default)
+   - Installed via system package manager
+
+6. Prebuilt Binary Installation
+   - matugen: Material color scheme generator (Rust)
+   - eza: Modern ls replacement (Rust)
+   - Shipped as precompiled binaries to avoid cargo dependency
+   - Installed to ~/.local/bin
+
+7. ML4W Applications Installation
+   - ML4W Welcome App
+   - ML4W Settings App
+   - ML4W Sidebar
+   - Installed via AUR or provided installation method
+
+8. Dotfiles Deployment
+   - Copies dotfiles/.config/* to ~/.config/
+   - Preserves existing configurations (backup/restore system)
+   - Symlinks or copies based on dotinst configuration
+
+9. Configuration Restoration (if upgrading)
+   - Restores user settings from previous installation
+   - Settings defined in dotinst "restore" section:
+     * ML4W settings directory
+     * Keyboard layout
+     * Monitor configuration
+     * Waypaper config
+     * Hypridle config
+     * Keybindings
+     * Environment variables
+     * Layout settings
+     * Window rules
+     * Animations, decorations, window settings
+     * Custom configuration
+     * GTK 2/3/4 settings
+
+10. Initial Configuration
+    - Sets keyboard layout (default: us)
+    - Sets monitor resolution (default: preferred)
+    - Sets default terminal (default: kitty)
+    - Sets default browser (default: firefox)
+    - Can be configured via dotinst "settings" section
+
+
+3.4 MAJOR COMPONENTS & FEATURES
+------------------------------------------------------------
+
+A. Hyprland Configuration System
+
+Modular Configuration Architecture:
+- Main hyprland.conf is only 74 lines
+- Sources modular configs from conf/ directory
+- Each aspect has a base .conf file that sources variations
+- Variations stored in subdirectories for easy switching
+
+Example: Animation System
+- conf/animation.conf contains: source = ~/.config/hypr/conf/animations/...
+- conf/animations/ contains multiple animation profiles:
+  * default.conf
+  * disabled.conf
+  * smooth.conf
+  * etc.
+- User can switch by changing single line in animation.conf
+
+Configuration Categories:
+1. Animation: Multiple animation profiles (smooth, disabled, custom)
+2. Decoration: Blur, shadows, rounding variations (gamemode, blur, no-blur)
+3. Environment: Environment variable sets
+4. Keybindings: Different keybinding schemes
+5. Layout: Tiling layouts (dwindle, master)
+6. Monitor: Multi-monitor configurations
+7. Window: Window behavior settings
+8. Windowrule: Application-specific rules
+9. Workspace: Workspace configurations
+
+ML4W-Specific Features (conf/ml4w.conf):
+- Integrates ML4W apps and scripts
+- Defines custom dispatchers for ML4W utilities
+- Sets up ML4W-specific autostart items
+
+
+B. Color & Theming System
+
+Matugen Integration:
+- Automatic color scheme generation from wallpaper
+- Material Design 3 color algorithm
+- Generates colors for:
+  * Hyprland (colors.conf)
+  * Waybar (colors.css)
+  * Kitty terminal
+  * GTK themes
+  * Qt themes
+  * Rofi
+  * Swaync
+
+Adaptive Theming:
+- Changes wallpaper -> triggers matugen
+- Matugen generates new color scheme
+- All components reload with new colors
+- Seamless, cohesive color palette across entire desktop
+
+Global Theme System:
+- Accessible via CTRL+ALT+T
+- Predefined global themes:
+  * Modern: Clean, professional look
+  * Glass: Transparent, blurred aesthetics
+  * Glass-Walker: Glass theme with Walker launcher
+  * Modern-Walker: Modern theme with Walker
+  * Transparent: Fully transparent elements
+- Each theme bundles:
+  * Waybar theme
+  * Hyprland decorations
+  * Rofi/Walker configuration
+  * Color preferences
+
+
+C. Waybar (Status Bar)
+
+Multiple Theme Variations:
+- ML4W Modern: Default theme with all modules
+- ML4W Minimal: Reduced module set, cleaner look
+- Glass Center: Workspace selector centered, blurred background
+- Starter: Template for custom themes
+- Transparent: Fully transparent bar
+
+Module System (modules.json):
+- Modular JSON configuration
+- Extensive module set:
+  * Hyprland workspaces with icons
+  * Window titles
+  * System tray
+  * Network (NetworkManager)
+  * Bluetooth
+  * Pulseaudio/Pipewire
+  * CPU, memory, disk usage
+  * Temperature sensors
+  * Battery with custom notifications
+  * Clock with calendar popup
+  * Idle inhibitor
+  * ML4W-specific modules:
+    - Updates checker
+    - Quicklinks
+    - App launcher
+    - Wallpaper selector
+    - Screenshot tool
+    - Settings app
+
+Theme Switcher:
+- themeswitcher.sh allows live theme changes
+- Preserves color scheme across themes
+- Reloads waybar seamlessly
+
+
+D. ML4W Custom Applications
+
+1. ML4W Welcome App
+   - First-run experience
+   - Configuration wizard
+   - Tutorial system
+   - Links to documentation
+   - Installed from AUR or provided installer
+
+2. ML4W Settings App
+   - Central configuration hub
+   - Sections:
+     * Appearance: Themes, colors, decorations, animations
+     * Displays: Monitor configuration, resolution, scaling
+     * Keyboard: Layout, variant settings
+     * Window Manager: Layout, keybindings, workspace settings
+     * Applications: Default apps (terminal, browser, file manager)
+     * Display Manager: SDDM installation and theming
+     * System: Package updates, cleanup, snapshots
+   - GUI built with GTK/Qt
+   - Visual configuration without editing text files
+
+3. ML4W Sidebar
+   - Left-side panel with quick access
+   - Features:
+     * Calendar with event support (new in 2.10.0)
+     * Weather widget
+     * System stats
+     * Quick settings toggles
+     * Power menu
+   - Light/Dark theme toggle
+   - Customizable modules
+
+4. ML4W Utilities
+
+   ml4w-apps.sh (App Launcher):
+   - Quick access to common applications
+   - Categorized app list
+   - Uses rofi or walker
+
+   ml4w-finder.sh (Fuzzy Finder):
+   - File and folder search
+   - Integrates with fzf
+   - Quick navigation
+
+   ml4w-quicklinks.sh:
+   - Predefined URL shortcuts
+   - Browser bookmarks integration
+   - Configurable link sets
+
+   ml4w-screenshot.sh:
+   - Screenshot modes:
+     * Full screen
+     * Active window
+     * Selection area
+     * OCR (text recognition with tesseract)
+   - Clipboard integration
+   - Save to file
+   - Edit after capture
+
+   ml4w-wallpaper.sh:
+   - Wallpaper selector
+   - Integrates with waypaper
+   - Random wallpaper mode
+   - Sets wallpaper + generates colors
+
+
+E. Shell Integration
+
+Terminal CLI Shortcuts:
+- 'apps' -> launches ml4w-apps.sh
+- 'screenshot' -> launches screenshot tool
+- 'finder' -> launches fuzzy finder
+- 'updates' -> launches update script
+- 'filemanager' -> launches yazi (if installed)
+- 'system' -> launches btop
+- 'lock' -> locks screen with hyprlock
+- 'quick' -> launches quicklinks
+- 'wallpaper' -> launches wallpaper selector CLI
+
+Shell Support:
+- Bash: Preconfigured .bashrc
+- Zsh: Full zsh configuration
+- Fish: Fish shell config added in 2.9.9.1
+
+Prompt Themes:
+- Oh My Posh integration
+- Multiple prompt themes
+- Customizable with ohmyposh config
+
+
+F. Notification System
+
+Swaync (Notification Center):
+- Replaces dunst as default notification daemon
+- Features:
+  * Notification history
+  * Do Not Disturb mode
+  * Per-app notification settings
+  * Action buttons
+  * Media controls
+- Dark/Light theme support
+- Material Design styled
+- Integrated with Waybar
+
+
+G. Application Dock
+
+nwg-dock-hyprland:
+- Bottom or side dock
+- Auto-hide support (BETA - dock-autohide file in settings)
+- Customizable border size via dock-border.css
+- Pinned applications
+- Running application indicators
+- GTK theme integration
+
+
+H. Lock Screen & Idle Management
+
+Hyprlock:
+- Custom lock screen
+- Shows:
+  * Clock
+  * User avatar
+  * Input field with password dots
+  * Custom background (uses current wallpaper)
+- Configuration in hyprlock.conf
+
+Hypridle:
+- Idle timeout management
+- Actions:
+  * Dim screen after 5 minutes
+  * Lock screen after 10 minutes
+  * Turn off displays after 15 minutes
+  * Suspend after 30 minutes (optional)
+- Configurable timeouts
+- Inhibitors (prevents idle when media playing)
+
+
+I. Screenshot & Screen Recording
+
+Screenshot System:
+- Backend: grimblast-git
+- Modes: Full, window, region, OCR
+- Integration with cliphist (clipboard manager)
+- Edit integration (e.g., swappy)
+- Configurable save location
+- Settings stored in ~/.config/ml4w/settings/
+
+Screen Recording:
+- wf-recorder integration
+- Region selection with slurp
+- Audio recording support
+
+
+J. Walker Launcher (Optional)
+
+Alternative to Rofi:
+- Modern application launcher
+- Features:
+  * Application search
+  * File search
+  * Calculator
+  * System actions
+  * Web search
+- Wayland-native
+- GPU accelerated
+- Themeable
+- Can replace rofi system-wide
+
+
+K. Additional Features
+
+Sidepad:
+- New feature (2.9.9.1)
+- Move windows to right side panel
+- Quick access to reference windows
+- Configurable keybindings
+
+Display Zoom:
+- SUPER+SHIFT+Mousewheel Up: Zoom in
+- SUPER+SHIFT+Mousewheel Down: Zoom out
+- SUPER+SHIFT+Z: Reset zoom
+- Useful for presentations and accessibility
+
+Focus Script:
+- CTRL+Tab: Select window and switch to workspace
+- Visual window switcher
+- Cross-workspace navigation
+
+Blur Support:
+- Waybar blur enabled by default (if Hyprland supports)
+- Can be disabled via decoration variations
+- Per-window blur rules
+- Performance-optimized
+
+Game Mode:
+- Special variation sets for gaming
+- Decoration: gamemode.conf (minimal effects)
+- Window: gamemode.conf (fullscreen optimizations)
+- Animation: disabled.conf (maximum performance)
+- Toggle via settings app
+
+
+3.5 PACKAGE DEPENDENCIES
+------------------------------------------------------------
+
+Total Package Count: ~80-100 packages (varies by distro)
+
+Core Hyprland Ecosystem:
+- hyprland (compositor)
+- hyprpaper (wallpaper daemon)
+- hyprlock (lock screen)
+- hypridle (idle manager)
+- hyprpicker (color picker)
+- hyprshade (screen shader/filter)
+- xdg-desktop-portal-hyprland (portal implementation)
+
+Wayland Infrastructure:
+- libnotify (notifications)
+- qt5-wayland, qt6-wayland (Qt Wayland support)
+- uwsm (session manager)
+- wl-clipboard (clipboard utilities)
+- xdg-desktop-portal-gtk (fallback portal)
+
+System Integration:
+- polkit-gnome (authentication agent)
+- nm-connection-editor, network-manager-applet (networking)
+- power-profiles-daemon (power management)
+- udisks2, gvfs, gvfs-mtp (file system support)
+- udiskie (auto-mounting)
+
+Applications:
+- kitty (terminal)
+- waybar (status bar)
+- rofi (launcher)
+- wlogout (logout menu)
+- swaync (notification daemon)
+- waypaper (wallpaper manager)
+- nwg-dock-hyprland (dock)
+- nwg-displays (display config GUI)
+- nwg-look (GTK theme GUI)
+- pavucontrol (audio control)
+- blueman (bluetooth manager)
+- qt6ct (Qt6 configuration)
+- nautilus (file manager)
+- loupe (image viewer)
+- gnome-text-editor (text editor)
+- vlc (media player)
+- firefox (web browser)
+- neovim (editor)
+
+Tools & Utilities:
+- imagemagick (image manipulation)
+- swww (wallpaper daemon - new default)
+- grimblast-git (screenshot - AUR)
+- grim, slurp (screenshot tools)
+- cliphist (clipboard manager)
+- brightnessctl (backlight control)
+- tumbler (thumbnail generator)
+- tesseract, tesseract-data-eng (OCR)
+- figlet (ASCII art text)
+- fastfetch (system info)
+- htop, btop (system monitors)
+- xclip (X clipboard)
+- breeze (cursor theme)
+- fzf (fuzzy finder)
+- zsh (shell)
+- tty-clock (clock)
+
+Fonts:
+- otf-font-awesome (icon font)
+- ttf-firacode-nerd (Nerd Font)
+- ttf-jetbrains-mono-nerd (Nerd Font)
+- Bundled: Fira Sans, Material Icons
+
+Python:
+- python-pip
+- python-gobject
+- python-screeninfo
+- python-pywalfox (Firefox theming)
+
+Qt6:
+- qt6-svg
+- qt6-virtualkeyboard
+- qt6-multimedia-ffmpeg
+
+Theming:
+- gnome-themes-extra (GTK themes)
+- Colloid icons (bundled)
+- ArcAurora cursors (bundled)
+
+Prebuilt Binaries (shipped with dotfiles):
+- matugen (color generator)
+- eza (ls replacement)
+
+AUR Packages:
+- grimblast-git (screenshot utility)
+- ML4W apps (welcome, settings, sidebar - if using AUR method)
+
+Optional:
+- yazi (terminal file manager)
+- walker (alternative launcher)
+
+
+3.6 CONFIGURATION SYSTEM
+------------------------------------------------------------
+
+Configuration Philosophy:
+- Modular variations for easy customization
+- User settings preserved across updates
+- Text-based configs with GUI management tools
+- Template system for generating configs
+- Version tracking for migration
+
+Settings Storage:
+~/.config/ml4w/settings/ contains small files defining user choices:
+- terminal.sh: Default terminal (e.g., "kitty")
+- browser.sh: Default browser (e.g., "firefox")
+- filemanager.sh: Default file manager
+- screenshot-*: Screenshot tool configurations
+- dock-autohide: Enable dock auto-hide
+- dock-border.css: Dock border styling
+- hide-fastfetch: Disable fastfetch on terminal open
+- Various other behavioral toggles
+
+Variation System:
+- Base config files point to variations via source statements
+- Example: conf/decoration.conf sources conf/decorations/default.conf
+- To change decoration style:
+  * Edit conf/decoration.conf to point to different variation
+  * Or use Settings app to select visually
+- Common variations:
+  * animations/: default, smooth, disabled
+  * decorations/: default, gamemode, blur, no-blur
+  * keybindings/: default, custom
+  * layouts/: dwindle, master
+  * monitors/: default, multi-monitor configs
+  * windowrules/: default, gaming, productivity
+
+Template System (ml4w/tpl/):
+- Template files for generating configs
+- Used by Settings app to write configurations
+- Ensures consistent formatting
+
+Restoration System:
+- Defined in hyprland-dotfiles.dotinst "restore" array
+- On update, specified files/folders are backed up
+- User prompted which settings to restore
+- Prevents overwriting customizations
+
+Settings Integration (dotinst "settings" array):
+- Defines configurable parameters
+- Fields:
+  * type: "text" for text input
+  * mode: "replacesingleline", "overwritefile"
+  * title: Display name
+  * file: Target config file
+  * search: String to find
+  * value: Default value
+  * template: Format string ([VALUE] replaced)
+- Settings app reads this to generate UI
+- Changes written back to config files
+
+Version Tracking:
+- ml4w/version.json tracks installed version
+- Used for migration scripts
+- Changelog displayed on update
+
+
+3.7 TARGET AUDIENCE
+------------------------------------------------------------
+
+Primary Users:
+- Arch/Arch-based users wanting polished Hyprland setup
+- Fedora/OpenSuse users interested in Hyprland
+- Users migrating from X11 to Wayland
+- Ricing enthusiasts who want a solid base
+- Content creators needing aesthetic desktop
+- Users who want "just works" Hyprland experience
+- People wanting to learn Hyprland with good defaults
+
+Technical Level: Intermediate to Advanced
+- Assumes existing Arch/Linux installation
+- Requires understanding of package management
+- Benefits users who understand dotfiles concept
+- Extensive customization requires Hyprland knowledge
+- GUI tools make it accessible to intermediate users
+
+Also For:
+- Developers wanting consistent environment
+- System administrators testing Wayland
+- Linux enthusiasts wanting modern DE
+- Users wanting Material Design aesthetics
+- Multi-monitor users (extensive monitor config support)
+
+NOT for:
+- Complete Linux beginners (requires existing system)
+- Users without basic terminal knowledge
+- Those wanting minimal/lightweight setup (feature-rich)
+- Users uncomfortable with Wayland limitations
+- People needing X11-specific applications
+
+
+3.8 MAINTENANCE STATUS
+------------------------------------------------------------
+
+Repository Status: ACTIVELY MAINTAINED
+- Regular updates and releases
+- Active GitHub repository with issues and PRs
+- Detailed changelog with each release
+- Latest release: 2.10.1 (February 2026)
+- Both stable and rolling release channels
+
+Development Pace:
+- Frequent updates (2-4 weeks between versions typical)
+- Responsive to Hyprland changes (e.g., 0.53.x windowrule syntax)
+- Community contributions accepted
+- Professional documentation
+
+Support & Community:
+- Active Discord/Matrix community (implied by mentions)
+- Extensive online documentation at ml4w.com
+- GitHub issues for bug reports
+- Pull requests welcome (CONTRIBUTING.md, CODE_OF_CONDUCT.md)
+
+Distribution Support:
+- Arch Linux: Primary target, best supported
+- Fedora: Supported via setup-fedora.sh, uses COPR
+- OpenSuse Tumbleweed: Supported via setup-opensuse.sh
+- Generic: Provides dependency list for manual install
+
+ML4W Ecosystem:
+- ML4W OS Live ISO (BETA): Test environment
+- Dotfiles Installer (Flatpak): GUI installation tool
+- ml4w.com: Professional website and documentation
+- ML4W Wallpaper Bank: Curated wallpaper collection
+- Integration with Gemini AI (GEMINI.md)
+
+Recent Major Changes (from CHANGELOG):
+- 2.10.x: Renamed to ML4W OS, added Live ISO, btop theming
+- 2.9.9.6: Fedora 43 support, global font setting
+- 2.9.9.5: Hyprland 0.53.x compatibility, swww as default
+- 2.9.9.4: Global theme system, Walker support, dock auto-hide
+- 2.9.9.3: Colloid icons default, Walker launcher, reduced borders
+- 2.9.9.2: Hyprland 0.51.x compatibility, new swaync layout
+- 2.9.9.1: Full dark/light theme support, fish shell, sidepad
+- 2.9.9: Font Awesome 7, waybar blur, display zoom
+
+Quality Indicators:
+- Professional logo and branding
+- Comprehensive changelog
+- Structured code with clear organization
+- Bundled dependencies (fonts, cursors, binaries)
+- Backward compatibility (restoration system)
+- Version migration support
+- Regular Hyprland compatibility updates
+
+
+================================================================================
+4. SIDE-BY-SIDE COMPARISON
+================================================================================
+
+4.1 FEATURE COMPARISON MATRIX
+------------------------------------------------------------
+
+CATEGORY                    | ARCHTITUS          | ML4W DOTFILES
+----------------------------|--------------------|-----------------------
+Primary Purpose             | OS Installation    | Desktop Configuration
+Scope                       | Full System        | User Environment
+Installation Target         | Bare Metal/VM      | Existing Linux Install
+Execution Environment       | Arch ISO           | Installed System
+Installation Automation     | Full               | Partial (packages)
+Disk Partitioning           | Yes (automated)    | No
+Filesystem Creation         | Yes (btrfs/ext4)   | No
+Base System Install         | Yes (pacstrap)     | No
+Bootloader Setup            | Yes (GRUB)         | No
+User Creation               | Yes                | No
+Desktop Environment Support | 7 DEs              | Hyprland Only
+Hyprland Configuration      | Basic              | Advanced/Complete
+Theming System              | Static (Nordic)    | Dynamic (Material+AI)
+Color Generation            | No                 | Yes (matugen)
+Wallpaper Integration       | No                 | Yes (adaptive colors)
+Custom Applications         | No                 | Yes (Welcome/Settings)
+Configuration GUI           | No                 | Yes (ML4W Settings)
+Modular Configs             | No                 | Yes (variations)
+Multi-Monitor Support       | Basic              | Advanced
+Shell Configuration         | zsh (basic)        | bash/zsh/fish (full)
+Package Count (Hyprland)    | ~42 base + 22 AUR  | ~80-100 total
+Distribution Support        | Arch Only          | Arch/Fedora/OpenSuse
+Update Frequency            | None (deprecated)  | Regular (2-4 weeks)
+Documentation               | README only        | Full website
+Community Support           | Deprecated         | Active
+Maintenance Status          | Archived           | Active Development
+Learning Curve              | Low (automated)    | Medium (customization)
+Customization Depth         | Low (preset only)  | High (modular)
+File Manager                | thunar (Hypr)      | nautilus
+Terminal                    | kitty              | kitty
+Status Bar                  | waybar-hyprland    | waybar
+Launcher                    | rofi               | rofi/walker
+Notification Daemon         | dunst (Hypr)       | swaync
+Lock Screen                 | swaylock-effects   | hyprlock
+Wallpaper Daemon            | swaybg (Hypr)      | swww/hyprpaper
+Screenshot Tool             | grimblast          | grimblast + wrapper
+Logout Menu                 | wlogout            | wlogout
+Display Manager             | SDDM (theme: Nordic)| Optional SDDM (ML4W)
+Dock                        | No                 | nwg-dock-hyprland
+Clipboard Manager           | No                 | cliphist
+Theme Switcher              | No                 | Yes (global themes)
+OCR Support                 | No                 | Yes (tesseract)
+Color Picker                | hyprpicker (Hypr)  | hyprpicker
+Screen Shader               | No                 | hyprshade
+Sidebar                     | No                 | Yes (ML4W Sidebar)
+Calendar Integration        | No                 | Yes (in Sidebar)
+Restore System              | No                 | Yes (dotinst)
+Settings Persistence        | setup.conf         | ml4w/settings/*
+Snapshot Support            | snapper (btrfs)    | timeshift (optional)
+Boot Splash                 | Plymouth (arch-glow)| No (not applicable)
+GRUB Theme                  | Yes (CyberRe)      | No (not applicable)
+Gaming Support              | Steam/Lutris/Wine  | Game mode variations
+Virtualization              | libvirt/QEMU       | No
+AUR Helper Installation     | Yes (multiple)     | Yes (yay/paru)
+Multilib Enabled            | Yes                | Via user
+Firewall Setup              | ufw installed      | No
+Printing Setup              | CUPS enabled       | Optional script
+Bluetooth Setup             | Enabled            | blueman
+Audio System                | PulseAudio         | PulseAudio/Pipewire
+Font Installation           | Multiple nerdfont  | Bundled + more
+Cursor Theme                | No custom          | ArcAurora (3 variants)
+Icon Theme                  | Papirus (Hypr)     | Colloid
+GTK Theme                   | Nordic (KDE)       | Adaptive (matugen)
+Qt Theme                    | Nordic (KDE)       | qt6ct
+Installed Size (approx)     | 5-15GB (full)      | 100-500MB (dotfiles)
+Installation Time           | 15-30 min          | 5-10 min
+System Modification         | Complete           | ~/.config only
+Rollback Capability         | Snapper snapshots  | Backup/restore dotfiles
+Multi-Distribution          | No                 | Yes
+Live ISO                    | No (uses Arch ISO) | Yes (ML4W OS)
+
+
+4.2 PACKAGE OVERLAP ANALYSIS
+------------------------------------------------------------
+
+SHARED PACKAGES (Both Install These):
+- Hyprland core: hyprland
+- Terminal: kitty
+- Launcher: rofi
+- Bar: waybar (ArchTitus: waybar-hyprland)
+- Logout: wlogout
+- Screenshot: grimblast-git (AUR)
+- Audio: pavucontrol
+- Brightness: brightnessctl
+- Color Picker: hyprpicker
+- Clipboard: wl-clipboard
+- Editor: neovim
+- File Manager: thunar (ArchTitus) vs nautilus (ML4W) - DIFFERENT
+- Fonts: nerd fonts (various), noto-fonts, noto-fonts-emoji
+- Icons: papirus-icon-theme (ArchTitus) vs Colloid (ML4W) - DIFFERENT
+- Image Viewer: viewnior (ArchTitus) vs loupe (ML4W) - DIFFERENT
+- Media: playerctl (ArchTitus only - minimal Hypr)
+- Polkit: polkit-gnome
+- Shell: zsh (both support, different configs)
+- System Monitor: htop (ArchTitus), htop + btop (ML4W)
+- Theme Tools: nwg-look vs nwg-look-bin
+- Thumbnails: tumbler, ffmpegthumbnailer (ArchTitus)
+- Utils: curl, git, wget, unzip, tar, rsync
+- Wayland: qt5-wayland, qt6-wayland
+
+UNIQUE TO ARCHTITUS:
+Base System (N/A for ML4W):
+- Linux kernel, base, base-devel
+- Bootloader: grub, os-prober, efibootmgr
+- Filesystem: btrfs-progs, dosfstools
+- Init: systemd (already installed)
+
+Desktop Components:
+- Lock: swaylock-effects vs hyprlock (ML4W)
+- Notification: dunst vs swaync (ML4W)
+- Wallpaper: swaybg vs swww/hyprpaper (ML4W)
+- Display Manager: sddm-git (AUR) vs optional (ML4W)
+- Prompt: starship vs oh-my-posh (ML4W)
+- Video: celluloid (MPV frontend)
+
+ArchTitus-Only Packages:
+- Gaming: steam, lutris, gamemode, wine-*, dxvk-bin, mangohud
+- VM: qemu, virt-manager, virt-viewer, libvirt, bridge-utils, vde2
+- Development: code (VSCode), jdk-openjdk, gcc, make
+- Graphics: gimp, gparted, grub-customizer
+- Media: celluloid
+- Compression: p7zip (ML4W relies on system)
+- Network: synergy, bind, openbsd-netcat
+- Security: ufw
+- Printing: cups (service enabled)
+- Boot: plymouth-git, snapper, snap-pac, snapper-gui-git
+- Apps: github-desktop-bin, brave-bin, zoom
+- Theming (KDE): nordic-*, lightly-*, ocs-url, konsave
+
+UNIQUE TO ML4W:
+Hyprland Ecosystem:
+- hyprpaper, hyprlock, hypridle, hyprshade
+- xdg-desktop-portal-hyprland
+
+Wayland/Session:
+- uwsm (session manager)
+- xdg-desktop-portal-gtk
+
+Applications:
+- Dock: nwg-dock-hyprland
+- Monitor Config: nwg-displays
+- Notifications: swaync
+- Wallpaper Manager: waypaper
+- File Manager: nautilus, gnome-text-editor
+- Image Viewer: loupe
+- Video: vlc
+- Network: nm-connection-editor, network-manager-applet, blueman
+- Config: qt6ct
+
+Tools:
+- swww (wallpaper daemon)
+- cliphist (clipboard manager)
+- slurp (region selector)
+- grim (screenshot backend)
+- figlet, fastfetch (system info)
+- fzf (fuzzy finder)
+- tesseract, tesseract-data-eng (OCR)
+- breeze (cursor)
+- tty-clock
+- imagemagick
+- xclip
+- eza (ls replacement, prebuilt)
+- matugen (color gen, prebuilt)
+
+Python:
+- python-screeninfo
+- python-pywalfox
+
+Qt:
+- qt6-svg, qt6-virtualkeyboard, qt6-multimedia-ffmpeg
+
+System:
+- power-profiles-daemon
+- udisks2, gvfs, gvfs-mtp, udiskie
+- inotify-tools
+- pacman-contrib
+- gnome-themes-extra
+
+Fonts (bundled):
+- Fira Code Nerd, Fira Sans, Material Icons
+- Font Awesome (otf-font-awesome)
+
+Themes (bundled):
+- Colloid icons
+- ArcAurora cursors
+
+ML4W Apps (AUR or installer):
+- ML4W Welcome App
+- ML4W Settings App
+- ML4W Sidebar
+
+CONFLICT ANALYSIS:
+Potential conflicts if both used together:
+1. Display Manager: ArchTitus enables SDDM, ML4W optionally installs
+2. Notification Daemon: dunst vs swaync (systemd user services conflict)
+3. Wallpaper Daemon: swaybg vs swww/hyprpaper (Hyprland config conflict)
+4. Lock Screen: swaylock-effects vs hyprlock (keybinding conflict)
+5. Waybar: Different package (waybar-hyprland vs waybar)
+6. File Manager: thunar vs nautilus (default app conflict)
+7. Theming: Nordic static vs dynamic Material (visual conflict)
+8. Shell Config: Different zsh setups (rc file conflict)
+9. Hyprland Config: Basic vs modular (config file conflict)
+
+
+4.3 PHILOSOPHY & APPROACH DIFFERENCES
+------------------------------------------------------------
+
+ARCHTITUS PHILOSOPHY:
+"Automated, Opinionated Arch Installation"
+
+Design Principles:
+- Automation Over Customization
+  * Minimize user decisions to essential choices
+  * Provide working defaults for everything
+  * Get user from ISO to desktop in one script run
+
+- Broad Support Over Depth
+  * Support multiple desktop environments
+  * Each DE gets basic, working configuration
+  * Not focused on perfection of any single DE
+
+- Installation Focus
+  * Core competency is OS installation, not configuration
+  * Disk partitioning, bootloader, base system are priorities
+  * DE configs are "bonus" to get started
+
+- Beginner-Friendly
+  * Abstract away Arch installation complexity
+  * TUI menus instead of typing commands
+  * Warnings and confirmations for destructive operations
+
+- Self-Contained
+  * Bundles all needed configs and themes
+  * Minimal external dependencies during install
+  * Works offline after initial package downloads
+
+- Opinionated Choices
+  * Nordic theme for KDE (specific aesthetic)
+  * CyberRe GRUB theme (specific style)
+  * Plymouth boot splash (eye candy)
+  * Full install includes gaming/VM (power user oriented)
+
+- Traditional Linux
+  * Follows standard Arch installation process
+  * Uses well-established tools (GRUB, systemd)
+  * Conservative choices (PulseAudio not PipeWire)
+  * X11 support alongside Wayland
+
+
+ML4W DOTFILES PHILOSOPHY:
+"Comprehensive, Modular Hyprland Desktop Environment"
+
+Design Principles:
+- Customization Over Defaults
+  * Extensive variation system for every aspect
+  * User choice preserved across updates
+  * GUI tools for visual customization
+  * Template system for generating configs
+
+- Depth Over Breadth
+  * Single focus: Hyprland excellence
+  * Every component optimized for Hyprland
+  * No X11 support, pure Wayland
+  * Deep integration between all components
+
+- Configuration Focus
+  * Assumes OS installation already done
+  * Expertise in desktop environment, not system install
+  * Dotfiles as primary deliverable
+
+- Intermediate-Advanced Users
+  * Assumes Linux/Arch familiarity
+  * Provides power user features
+  * Extensive but well-documented
+  * Learning curve for full feature utilization
+
+- Material Design Aesthetic
+  * Consistent design language (Material 3)
+  * Adaptive color theming from wallpaper
+  * Modern, polished look
+  * Professional presentation
+
+- Dynamic Theming
+  * Colors generated from wallpaper (matugen)
+  * Multiple global theme presets
+  * Live theme switching without restart
+  * Cohesive color across all apps
+
+- Modern Wayland Ecosystem
+  * Latest Hyprland features (blur, animations, etc.)
+  * Native Wayland tools (wl-clipboard, swww, etc.)
+  * Portal integration for screen sharing
+  * Future-focused (Wayland is future)
+
+- Living Configuration
+  * Active development with regular updates
+  * Community-driven improvements
+  * Responsive to Hyprland changes
+  * Professional maintenance
+
+- Cross-Distribution
+  * Works on Arch, Fedora, OpenSuse
+  * Adaptation scripts per distro
+  * Generic fallback for others
+
+- Feature-Rich
+  * Not minimalist - comprehensive tool set
+  * Many included utilities and scripts
+  * GUI apps for common tasks
+  * Integration with ecosystem (Firefox theming, etc.)
+
+
+PHILOSOPHICAL CONFLICTS:
+1. Installation vs Configuration
+   - ArchTitus: "Install the OS"
+   - ML4W: "Configure the desktop"
+   - Conflict: Different problem domains
+
+2. Breadth vs Depth
+   - ArchTitus: 7 DEs, basic configs
+   - ML4W: 1 DE, advanced configs
+   - Conflict: Can't be expert in everything
+
+3. Automation vs Customization
+   - ArchTitus: Automate to reduce decisions
+   - ML4W: Provide options for customization
+   - Conflict: Simplicity vs flexibility
+
+4. Static vs Dynamic
+   - ArchTitus: Fixed themes (Nordic)
+   - ML4W: Adaptive themes (Material)
+   - Conflict: Consistency vs personalization
+
+5. Traditional vs Modern
+   - ArchTitus: Proven tools, conservative
+   - ML4W: Cutting-edge, Wayland-only
+   - Conflict: Stability vs innovation
+
+6. Beginner vs Intermediate
+   - ArchTitus: Lower barrier to entry
+   - ML4W: Assumes existing knowledge
+   - Conflict: Accessibility vs depth
+
+COMPLEMENTARY ASPECTS:
+- ArchTitus installs, ML4W configures (sequential use)
+- ArchTitus provides base, ML4W enhances (layered use)
+- Different target audiences (not competing)
+- Different problem spaces (compatible goals)
+
+
+4.4 USE CASE SCENARIOS
+------------------------------------------------------------
+
+SCENARIO 1: Complete Arch Beginner
+User: Never installed Arch, wants Hyprland
+
+Best Choice: ArchTitus
+Why:
+- Automates complex installation process
+- Gets working Hyprland system quickly
+- Includes all system setup (disk, bootloader, user)
+- Lower learning curve for initial install
+
+Alternative: Archinstall (official) then ML4W
+Why:
+- Archinstall is officially supported
+- ML4W provides better Hyprland config
+- More modular approach
+- Better long-term maintainability
+
+
+SCENARIO 2: Existing Arch User Wanting Hyprland
+User: Has Arch installed, wants to try Hyprland
+
+Best Choice: ML4W Dotfiles
+Why:
+- Doesn't reinstall OS unnecessarily
+- Provides complete Hyprland environment
+- Preserves existing system
+- Easy to test and revert
+
+ArchTitus: Not Applicable
+- Would require full OS reinstall
+- Overkill for just adding Hyprland
+- Risk of data loss
+
+
+SCENARIO 3: Content Creator Needing Aesthetic Desktop
+User: Makes YouTube videos, wants beautiful Hyprland setup
+
+Best Choice: ML4W Dotfiles
+Why:
+- Dynamic theming for variety
+- Professional, polished look
+- Material Design aesthetics
+- Easy theme switching for different videos
+- Wallpaper-adaptive colors for cohesion
+
+ArchTitus: Acceptable but Limited
+- Static Nordic theme
+- Basic Hyprland config
+- Less visual customization
+- No dynamic theming
+
+
+SCENARIO 4: System Administrator Testing Hyprland
+User: Sysadmin evaluating Wayland/Hyprland for organization
+
+Best Choice: ML4W Dotfiles on Test System
+Why:
+- Doesn't require reinstall
+- Can test on existing VM/workstation
+- Comprehensive Hyprland experience
+- Active maintenance (gets updates)
+- Multi-distro support (can test on Fedora)
+
+ArchTitus: Acceptable for Greenfield
+- If starting from scratch/VM
+- Quick setup for testing
+- But: deprecated status concerning
+- Limited to Arch only
+
+
+SCENARIO 5: Linux Enthusiast Learning Arch
+User: Wants to learn Arch installation process
+
+Best Choice: Manual Installation (Arch Wiki)
+Why:
+- Educational value in manual process
+- Understand every step
+- Learn Arch philosophy
+
+Second Choice: ArchTitus for comparison
+Why:
+- Can compare manual vs automated
+- See what automation does
+- Learn from script source code
+
+ML4W: Not Relevant
+- Doesn't teach OS installation
+- Assumes existing system
+
+
+SCENARIO 6: Power User Wanting Customized Hyprland
+User: Experienced Linux user, wants fully customized Hyprland
+
+Best Choice: ML4W Dotfiles as Base
+Why:
+- Modular variation system easy to extend
+- Good starting point for customization
+- Well-structured configs to learn from
+- Active development to track
+
+Alternative: Build from Scratch
+Why:
+- Ultimate control
+- Learn Hyprland deeply
+- No cruft
+
+ArchTitus: Not Ideal
+- Basic config harder to extend
+- Deprecated (no updates to learn from)
+- Static theming
+
+
+SCENARIO 7: Gamer Wanting Arch + Hyprland
+User: Primary use is gaming, wants Arch with Hyprland
+
+Best Choice: ArchTitus
+Why:
+- Includes Steam, Lutris, Wine, DXVK, MangoHUD
+- Gaming packages in full install
+- One-stop setup for gaming rig
+
+ML4W: Requires Manual Game Setup
+- Doesn't include gaming packages
+- Has game mode configs (performance)
+- User must install games separately
+- Still good for gaming (Hyprland game mode)
+
+
+SCENARIO 8: Multi-Monitor Workstation
+User: Developer with 3+ monitors, needs Hyprland
+
+Best Choice: ML4W Dotfiles
+Why:
+- Advanced multi-monitor support
+- nwg-displays GUI for configuration
+- Per-monitor settings in variations
+- Better scaling/positioning options
+
+ArchTitus: Basic Support
+- Can configure monitors manually
+- No GUI tools for monitor management
+- Sufficient but less convenient
+
+
+SCENARIO 9: Minimal/Lightweight System
+User: Old hardware, wants lightweight Hyprland
+
+Best Choice: ArchTitus MINIMAL Install
+Why:
+- Minimal install option (reduced packages)
+- Can skip AUR packages
+- Less bloat than ML4W
+
+ML4W: Feature-Rich (Heavier)
+- Many included apps and utilities
+- Dock, sidebar, multiple daemons
+- Better for modern hardware
+
+
+SCENARIO 10: Fedora User Wanting Hyprland
+User: Uses Fedora, wants Hyprland setup
+
+Best Choice: ML4W Dotfiles
+Why:
+- Supports Fedora via setup-fedora.sh
+- Uses COPR for Hyprland packages
+- Only option that works on Fedora
+
+ArchTitus: Not Applicable
+- Arch Linux only
+- Would require distro switch
+
+
+SCENARIO 11: Quick Test/Demo System
+User: Needs Hyprland demo environment quickly
+
+VM Scenario: ArchTitus
+Why:
+- Boot Arch ISO, run script, done
+- One command to full desktop
+- Fast for disposable test environments
+
+Existing System: ML4W
+Why:
+- Dotfiles install in minutes
+- No OS installation overhead
+- Can use ML4W OS Live ISO for testing
+
+
+SCENARIO 12: Long-Term Daily Driver
+User: Wants Hyprland as permanent desktop
+
+Best Choice: ML4W Dotfiles
+Why:
+- Active maintenance (gets updates)
+- Configuration longevity
+- Update system preserves customizations
+- Community support
+
+ArchTitus: Concerns
+- Deprecated status
+- No ongoing updates
+- May break with future Hyprland changes
+- Would need manual maintenance
+
+
+================================================================================
+5. CAN THEY BE USED TOGETHER?
+================================================================================
+
+SHORT ANSWER: Sequentially Yes, Simultaneously No
+
+SEQUENTIAL USE (Recommended):
+Step 1: Install OS with ArchTitus
+- Use ArchTitus to install base Arch system
+- Choose "server" or "minimal" desktop environment
+  * Avoids desktop environment conflicts
+  * Gets bootloader, disk setup, base system
+  * Skip Hyprland option in ArchTitus
+
+Step 2: Install ML4W Dotfiles
+- On freshly installed system, run ML4W setup
+- ML4W installs packages and configures Hyprland
+- Benefits:
+  * Automated OS install (ArchTitus strength)
+  * Advanced Hyprland config (ML4W strength)
+  * Best of both worlds
+
+Caveats:
+- ArchTitus zsh config will be overwritten by ML4W
+- Some package duplication (harmless)
+- ArchTitus theming (GRUB, Plymouth) remains
+  * Can coexist with ML4W Hyprland config
+  * Different system layers (boot vs desktop)
+
+
+SIMULTANEOUS USE (Not Recommended):
+If ArchTitus Hyprland install + ML4W both applied:
+
+CONFLICTS:
+1. Hyprland Configuration
+   - ArchTitus: ~/.config/hypr/hyprland.conf (basic)
+   - ML4W: ~/.config/hypr/hyprland.conf (modular)
+   - Resolution: Last one applied wins (ML4W would overwrite)
+
+2. Waybar
+   - ArchTitus: waybar-hyprland package
+   - ML4W: waybar package
+   - Both installed: pacman conflict or one replaces other
+   - Different configs: ML4W overwrites ArchTitus config
+
+3. Notification Daemon
+   - ArchTitus: dunst
+   - ML4W: swaync
+   - Both running: Two notification daemons compete
+   - Resolution: Disable one in autostart
+
+4. Wallpaper Daemon
+   - ArchTitus: swaybg (via Hyprland config)
+   - ML4W: swww or hyprpaper
+   - Both configured: Hyprland config determines which runs
+   - Resolution: ML4W config takes precedence
+
+5. Lock Screen
+   - ArchTitus: swaylock-effects
+   - ML4W: hyprlock
+   - Different keybindings and configs
+   - Resolution: ML4W config overwrites keybindings
+
+6. Display Manager
+   - ArchTitus: Enables SDDM service
+   - ML4W: Optional SDDM with different theme
+   - Service conflict: Only one can be enabled
+   - Theme conflict: Different SDDM configs
+
+7. Shell Configuration
+   - ArchTitus: ChrisTitusTech zsh config
+   - ML4W: ML4W zsh config (or bash/fish)
+   - .zshrc conflict: One overwrites the other
+
+8. Terminal Config
+   - Both: Use kitty
+   - ArchTitus: Includes 200+ kitty themes
+   - ML4W: Material-themed kitty
+   - Minor conflict: Different configs, ML4W overwrites
+
+
+COMPATIBILITY LAYERS:
+These components from ArchTitus can coexist with ML4W:
+
+Boot Layer (No Conflict):
+- GRUB bootloader with CyberRe theme
+- Plymouth boot splash (arch-glow)
+- Reason: Different system layer, not desktop config
+
+System Services (No Conflict):
+- CUPS (printing)
+- NetworkManager
+- Bluetooth
+- NTP
+- Reason: System-level services, both use same
+
+Snapshot System (Compatible):
+- ArchTitus: snapper (for btrfs)
+- ML4W: Optional timeshift
+- Can coexist: Different tools, same goal
+- Resolution: Use one or both
+
+Packages (Mostly Harmonious):
+- Shared packages: Both install, no conflict
+- Unique packages: Additive, no conflict
+- Replacement packages (waybar): One replaces other
+- Gaming/VM packages from ArchTitus: ML4W doesn't touch
+
+
+MIGRATION PATH (ArchTitus -> ML4W):
+
+If you have ArchTitus Hyprland install and want ML4W:
+
+1. Backup Current Config
+   $ cp -r ~/.config/hypr ~/.config/hypr.archtitus.backup
+
+2. Backup ArchTitus Folder
+   $ cp -r ~/ArchTitus ~/ArchTitus.backup
+   (Note: ArchTitus scripts delete themselves, may not exist)
+
+3. List Current Packages
+   $ pacman -Qqe > ~/installed-packages.txt
+   (Reference for what ArchTitus installed)
+
+4. Install ML4W
+   $ git clone https://github.com/mylinuxforwork/dotfiles.git
+   $ cd dotfiles
+   $ ./setup/setup.sh
+
+   Or use Dotfiles Installer (Flatpak)
+
+5. ML4W Overwrites
+   - ~/.config/hypr/* replaced with ML4W configs
+   - ~/.config/waybar/* replaced
+   - ~/.config/kitty/* replaced
+   - ~/.zshrc replaced (if using zsh)
+
+6. What Remains from ArchTitus
+   - GRUB theme (CyberRe) - in /boot partition
+   - Plymouth theme (arch-glow) - in /usr/share
+   - Enabled system services (CUPS, etc.)
+   - Base system packages
+   - Gaming packages (Steam, Lutris, etc.)
+   - VM packages (QEMU, virt-manager)
+   - Additional utilities (htop, etc.)
+
+7. Cleanup (Optional)
+   - Remove duplicate packages:
+     $ sudo pacman -R dunst swaylock-effects swaybg waybar-hyprland sddm-git
+   - Or keep them, harmless if not running
+
+8. Test New Config
+   - Reboot or restart Hyprland
+   - ML4W config should load
+   - Check for errors in Hyprland log:
+     $ hyprctl log
+
+9. Restore Desired ArchTitus Elements
+   - If you liked ChrisTitus zsh:
+     $ cp ~/.zshrc.archtitus.backup ~/.zshrc
+   - If you want ArchTitus keybindings:
+     Merge into ~/.config/hypr/conf/keybindings/default.conf
+
+
+USING BOTH SIMULTANEOUSLY (Advanced):
+
+Possible but Complex:
+- Requires manual config merging
+- Cherry-pick desired components from each
+- Maintain custom hybrid configuration
+
+Example Hybrid:
+- OS Install: ArchTitus (gets system set up)
+- Hyprland Config: ML4W base + custom modifications
+- Gaming Packages: ArchTitus list
+- Theming: ML4W dynamic theming
+- Boot: ArchTitus GRUB + Plymouth
+- Snapshots: snapper (ArchTitus) OR timeshift (ML4W)
+
+Maintenance Burden:
+- Updates to either project may break hybrid
+- Manual resolution of conflicts
+- No automated update path
+- Only for advanced users comfortable with conflict resolution
+
+
+RECOMMENDED APPROACH:
+Choose one for Hyprland configuration:
+- If starting fresh: ArchTitus -> ML4W migration
+- If existing Arch: ML4W only
+- Don't run both Hyprland configs simultaneously
+
+Combine strengths:
+- ArchTitus: OS installation, gaming/VM packages, boot theming
+- ML4W: Hyprland desktop environment and theming
+
+This gives:
+- Automated Arch installation (saves time)
+- Professional Hyprland config (best experience)
+- Gaming ready (ArchTitus packages)
+- Beautiful boot (ArchTitus GRUB/Plymouth)
+- Beautiful desktop (ML4W theming)
+
+
+================================================================================
+6. PROS AND CONS
+================================================================================
+
+ARCHTITUS
+------------------------------------------------------------
+
+PROS:
++ Fully automated Arch installation
+  - Saves hours compared to manual installation
+  - Reduces error potential for beginners
+  - One script from ISO to desktop
+
++ Comprehensive system setup
+  - Handles disk partitioning (complex task automated)
+  - Configures bootloader (GRUB with theming)
+  - Sets up user accounts and permissions
+  - Enables essential services automatically
+
++ Multiple desktop environment support
+  - KDE, GNOME, Hyprland, Awesome, Cinnamon, DWM, Server
+  - Flexibility to choose preferred DE
+  - Each gets functional configuration
+
++ Beginner-friendly
+  - Interactive TUI menus (no memorizing commands)
+  - Clear warnings for destructive operations
+  - Guided experience through installation
+
++ Gaming and VM ready
+  - Includes Steam, Lutris, Wine, DXVK, MangoHUD
+  - QEMU, virt-manager, libvirt configured
+  - One-stop shop for power users
+
++ Filesystem flexibility
+  - Supports btrfs with subvolumes (modern)
+  - Supports ext4 (traditional)
+  - Supports LUKS encryption (security)
+  - SSD optimization options
+
++ Snapshot support
+  - Snapper configured for btrfs
+  - snap-pac for pacman integration
+  - Rollback capability
+
++ Aesthetic boot experience
+  - CyberRe GRUB theme (professional look)
+  - Plymouth boot splash (smooth boot)
+  - Theming often overlooked in other installers
+
++ Opinionated but sensible defaults
+  - Nordic theme for KDE (popular choice)
+  - Zsh with Powerlevel10k (modern shell)
+  - Kitty terminal with extensive themes
+
++ Well-structured code
+  - Modular scripts (0-preinstall, 1-setup, etc.)
+  - Clear progression through installation phases
+  - Easy to understand and modify
+
++ Self-contained
+  - Bundles all needed configs and themes
+  - Works offline after package download
+  - No external dependencies during install
+
+CONS:
+- DEPRECATED / Archived project
+  * No ongoing development or support
+  * Not receiving updates for new Hyprland versions
+  * May break with future Arch/Hyprland changes
+  * Moved to LinUtil (different project)
+
+- Arch Linux only
+  * No support for other distributions
+  * Requires Arch ISO to use
+  * Can't help Fedora/OpenSuse users
+
+- Basic desktop configurations
+  * Hyprland config is minimal
+  * No advanced theming system
+  * Static themes (no dynamic colors)
+  * Limited customization out of box
+
+- All-or-nothing approach
+  * Must reinstall entire OS to use
+  * Can't just add to existing system
+  * Destructive (formats disk)
+  * Risky for existing installations
+
+- Limited Hyprland focus
+  * Supports 7 DEs but master of none
+  * Hyprland config not as advanced as dedicated projects
+  * Missing modern Hyprland features (hyprlock, hypridle, etc.)
+
+- Outdated package choices
+  * waybar-hyprland (AUR, possibly deprecated)
+  * sddm-git (using git version instead of stable)
+  * dunst (older notification daemon)
+  * swaylock-effects vs modern hyprlock
+
+- No GUI configuration tools
+  * All config via text files
+  * No settings manager
+  * Steep learning curve for customization
+
+- No update/maintenance system
+  * Once installed, on your own
+  * No dotfile update mechanism
+  * Manual maintenance required
+
+- Hyprland config not modular
+  * Single config file approach
+  * Harder to customize without breaking
+  * No variation system
+
+- PulseAudio instead of PipeWire
+  * Older audio system
+  * Missing modern features
+  * PipeWire becoming standard
+
+- Learning value loss
+  * Automation means not learning manual process
+  * Black box installation
+  * Harder to troubleshoot if issues arise
+
+- Potential package bloat
+  * Full install includes gaming/VM (large)
+  * Minimal install still has ~113 packages
+  * No granular control over package selection
+
+
+ML4W DOTFILES
+------------------------------------------------------------
+
+PROS:
++ Active development and maintenance
+  - Regular updates (2-4 week cycle typical)
+  - Responsive to Hyprland changes
+  - Bug fixes and feature additions
+  - Professional, ongoing support
+
++ Advanced Hyprland configuration
+  - Modular variation system
+  - All modern Hyprland features utilized
+  - Optimized for Hyprland workflow
+  - Deep integration of ecosystem
+
++ Dynamic Material Design theming
+  - Wallpaper-adaptive colors (matugen)
+  - Consistent color across all apps
+  - Multiple global theme presets
+  - Live theme switching
+  - Professional, modern aesthetic
+
++ Comprehensive feature set
+  - Not just configs, but complete environment
+  - Custom apps (Welcome, Settings, Sidebar)
+  - Extensive utility scripts
+  - GUI tools for common tasks
+
++ Excellent multi-monitor support
+  - nwg-displays GUI for configuration
+  - Per-monitor variations
+  - Advanced scaling and positioning
+  - Well-documented setup
+
++ Cross-distribution support
+  - Arch, Fedora, OpenSuse
+  - Adaptation scripts for each
+  - Generic fallback for others
+  - Broader compatibility
+
++ Non-destructive installation
+  - Works on existing Linux installs
+  - No disk partitioning or formatting
+  - Safe to test and remove
+  - Backup/restore system
+
++ Update system
+  - Preserves user customizations
+  - Dotfiles Installer handles updates
+  - Changelog and migration support
+  - Version tracking
+
++ Modular configuration
+  - Easy to customize individual aspects
+  - Variation system for animations, decorations, etc.
+  - Template system for config generation
+  - Well-organized file structure
+
++ GUI configuration tools
+  - ML4W Settings app for visual config
+  - No text editing required for basics
+  - Accessible to less technical users
+  - Professional interface
+
++ Extensive documentation
+  - Full website at ml4w.com
+  - Detailed changelog
+  - Community resources
+  - Active support channels
+
++ Modern Wayland ecosystem
+  - Latest tools and daemons
+  - Pure Wayland (no X11 baggage)
+  - Future-focused approach
+  - Best practices followed
+
++ Bundled resources
+  - Fonts included (Fira Code, Fira Sans, Material Icons)
+  - Cursor theme (ArcAurora)
+  - Icon theme (Colloid)
+  - Prebuilt binaries (matugen, eza)
+  - No cargo dependency for Rust tools
+
++ OCR support
+  - Screenshot with text recognition
+  - Tesseract integration
+  - Useful for accessibility and workflow
+
++ Walker launcher option
+  - Modern alternative to rofi
+  - Wayland-native, GPU accelerated
+  - Optional but well-integrated
+
++ Hyprland-specific optimizations
+  - Game mode variations (performance)
+  - Blur optimizations
+  - Animation profiles
+  - Display zoom feature
+
++ Professional presentation
+  - Branded (ML4W logo)
+  - Consistent design language
+  - Polished user experience
+  - Attention to detail
+
++ Dotfiles Installer integration
+  - Flatpak app for easy installation
+  - GUI-based setup
+  - Update notifications
+  - Non-technical user friendly
+
++ ML4W OS Live ISO
+  - Test before installing
+  - Demo environment
+  - Installation option from ISO (BETA)
+
+CONS:
+- Does NOT install operating system
+  * Assumes existing Linux installation
+  * Can't help with OS install process
+  * Requires separate installation step
+
+- Hyprland only
+  * No support for other DEs or WMs
+  * All-in on Hyprland
+  * Can't use if preferring KDE, GNOME, etc.
+
+- Feature-rich = Heavier
+  * Many packages and dependencies
+  * Not minimal/lightweight approach
+  * Dock, sidebar, multiple daemons
+  * Higher resource usage than bare Hyprland
+
+- Learning curve for full utilization
+  * Many features to discover
+  * Variation system requires understanding
+  * Customization depth can be overwhelming
+  * Documentation extensive but time to read
+
+- Requires existing Arch/Linux knowledge
+  * Not for complete Linux beginners
+  * Assumes familiarity with package managers
+  * Terminal usage required for some tasks
+  * Dotfiles concept may be foreign to new users
+
+- No gaming packages included
+  * Steam, Lutris, etc. must be installed separately
+  * Not turnkey for gaming rig
+  * User must configure gaming tools
+
+- No virtualization packages
+  * QEMU, virt-manager not included
+  * Must install manually if needed
+
+- Wayland limitations
+  * Some applications don't work on Wayland
+  * Screen sharing can be complex
+  * X11 apps via XWayland (potential issues)
+  * Newer ecosystem = less mature in some areas
+
+- Potential config complexity
+  * Many files and directories
+  * Variation system requires learning
+  * Easy to get lost in configs
+  * Advanced customization needs Hyprland knowledge
+
+- Material Design aesthetic
+  * Not to everyone's taste
+  * Specific design language imposed
+  * Heavily themed (some prefer minimal)
+  * Color generation may not always be ideal
+
+- ML4W apps as dependency
+  * Adds custom applications to install
+  * AUR packages or alternative install methods
+  * More moving parts to maintain
+
+- No boot theming
+  * Doesn't touch GRUB or Plymouth
+  * Not applicable (dotfiles level)
+  * Boot remains default or user-configured
+
+- Rolling release considerations
+  * Bleeding edge can break
+  * Hyprland itself is fast-moving
+  * May have occasional instability
+  * Stable channel available but less features
+
+- Configuration overwrite risk
+  * Installing on existing Hyprland setup overwrites configs
+  * Backup/restore helps but not perfect
+  * User customizations need careful preservation
+
+- Dependency on third-party tools
+  * matugen for color generation (Rust)
+  * Various Hyprland ecosystem tools (some AUR)
+  * If upstream breaks, ML4W affected
+
+
+================================================================================
+7. RECOMMENDATIONS
+================================================================================
+
+RECOMMENDATION MATRIX:
+------------------------------------------------------------
+
+Use ArchTitus if you:
+✓ Need to install Arch Linux from scratch
+✓ Are new to Arch and want automated installation
+✓ Want a gaming-ready system immediately
+✓ Need VM/virtualization set up automatically
+✓ Prefer KDE Plasma or GNOME over Hyprland
+✓ Want opinionated, tested defaults
+✓ Don't mind deprecated project for one-time use
+✓ Like Nordic aesthetic
+✓ Want beautiful GRUB and Plymouth boot theming
+✓ Are comfortable with static configurations
+✓ Installing in VM for testing (quick setup)
+
+Do NOT use ArchTitus if you:
+✗ Already have Arch Linux installed
+✗ Want ongoing updates and support
+✗ Need multi-distribution support
+✗ Want advanced Hyprland features
+✗ Prefer dynamic theming
+✗ Need GUI configuration tools
+✗ Are learning Arch (use manual install instead)
+
+
+Use ML4W Dotfiles if you:
+✓ Already have Arch (or Fedora/OpenSuse) installed
+✓ Want the best Hyprland experience possible
+✓ Love Material Design aesthetics
+✓ Want wallpaper-adaptive dynamic theming
+✓ Need multi-monitor support with GUI tools
+✓ Value active development and updates
+✓ Want extensive customization options
+✓ Prefer modular, variation-based configs
+✓ Like GUI configuration tools
+✓ Are intermediate to advanced Linux user
+✓ Want a complete, polished desktop environment
+✓ Appreciate professional presentation
+✓ Use multiple distributions (Arch/Fedora/OpenSuse)
+✓ Want non-destructive, reversible installation
+
+Do NOT use ML4W if you:
+✗ Need to install the operating system
+✗ Are complete Linux beginner
+✗ Want minimal/lightweight system
+✗ Prefer other DEs (KDE, GNOME, etc.)
+✗ Dislike feature-rich environments
+✗ Need gaming packages included by default
+✗ Must use X11 applications extensively
+✗ Prefer static, simple theming
+✗ Don't want many custom applications
+
+
+Use BOTH (Sequential) if you:
+✓ Need to install Arch from scratch (ArchTitus)
+✓ Want advanced Hyprland config (ML4W)
+✓ Want gaming packages (ArchTitus) + modern desktop (ML4W)
+✓ Like GRUB/Plymouth theming (ArchTitus) + desktop theming (ML4W)
+✓ Are comfortable managing hybrid configuration
+
+Process:
+1. Boot Arch ISO
+2. Run ArchTitus, select "server" or minimal install
+   (Avoids desktop environment conflicts)
+3. On installed system, install ML4W Dotfiles
+4. Enjoy automated OS install + advanced Hyprland
+
+
+Use NEITHER if you:
+✗ Want to learn Arch manually (use Arch Wiki instead)
+✗ Prefer different Hyprland dotfiles (JaKooLit, Prasanthrangan, etc.)
+✗ Want pure, minimal Hyprland (configure from scratch)
+✗ Use Arch-based distro other than pure Arch (e.g., EndeavourOS)
+  (May have own installers or conflicts)
+
+
+BEST PRACTICE RECOMMENDATIONS:
+------------------------------------------------------------
+
+For New Arch Users:
+1. Consider archinstall (official) or ArchTitus for OS install
+2. Install ML4W Dotfiles after OS is up
+3. Read Arch Wiki to understand your system
+4. Join ML4W community for Hyprland help
+
+For Existing Arch Users:
+1. Just install ML4W Dotfiles
+2. Backup existing configs first
+3. Explore variation system
+4. Customize to taste
+
+For Hyprland Enthusiasts:
+1. ML4W Dotfiles as solid base
+2. Study the configs to learn Hyprland
+3. Fork and modify to create your own
+4. Contribute back to project
+
+For Gamers:
+1. ArchTitus for full install (includes gaming packages)
+2. Consider replacing Hyprland config with ML4W after
+3. Or manually install gaming packages with ML4W
+
+For Multi-Monitor Setups:
+1. ML4W Dotfiles (best multi-monitor support)
+2. Use nwg-displays for visual configuration
+3. Create monitor variations for different setups (home/office)
+
+For Content Creators:
+1. ML4W Dotfiles (dynamic theming for variety)
+2. Multiple wallpapers + matugen for different looks
+3. Global themes for quick style changes
+4. Screenshot tools built-in
+
+For Minimalists:
+1. Neither (both are feature-rich)
+2. Install Hyprland manually
+3. Configure only what you need
+4. Or use ArchTitus minimal install
+
+For System Administrators:
+1. ML4W on test systems (multi-distro support)
+2. Use ML4W OS Live ISO for evaluation
+3. Consider stability (Hyprland + Wayland still maturing)
+
+For Learning:
+1. Manual Arch installation first (educational)
+2. Then explore ArchTitus source code (learn automation)
+3. Install ML4W, study the configs (learn Hyprland)
+4. Iterate and customize
+
+
+MIGRATION PATHS:
+------------------------------------------------------------
+
+From ArchTitus Hyprland -> ML4W:
+1. Backup ~/.config/hypr
+2. Install ML4W Dotfiles
+3. ML4W overwrites Hyprland config (expected)
+4. GRUB/Plymouth themes remain (different layer)
+5. Gaming/VM packages remain (ArchTitus advantage)
+6. Enjoy advanced Hyprland config
+
+From ML4W -> Different Hyprland Dotfiles:
+1. Backup ~/.config/ml4w (settings)
+2. Remove/replace Hyprland configs
+3. Install alternative dotfiles
+4. Manually reinstall preferred ML4W utilities if desired
+
+From Either -> Vanilla Hyprland:
+1. Remove dotfiles configurations
+2. Backup first (for reference)
+3. Start with clean Hyprland config
+4. Build up from minimal base
+
+
+FINAL THOUGHTS:
+------------------------------------------------------------
+
+ArchTitus and ML4W Dotfiles are NOT competitors - they solve
+different problems:
+
+ArchTitus: "I need Arch installed"
+ML4W: "I need Hyprland configured"
+
+The ideal scenario is using ArchTitus (or archinstall) to get a
+working Arch system, then installing ML4W Dotfiles to get a polished
+Hyprland desktop.
+
+If choosing only one:
+- Installing OS from scratch? ArchTitus (but consider archinstall)
+- Already have Arch? ML4W Dotfiles (no question)
+
+If ArchTitus wasn't deprecated, it would be a stronger
+recommendation. As it stands, ML4W is the actively maintained,
+feature-rich, future-proof choice for Hyprland specifically.
+
+For OS installation, consider the official archinstall as an
+alternative to ArchTitus - it's maintained, flexible, and part of
+the official Arch ISO.
+
+Both projects represent significant effort and skill. ArchTitus
+automated a complex process and helped many users get started with
+Arch. ML4W Dotfiles showcases what's possible with dedicated focus
+on a single desktop environment.
+
+Choose based on your needs, skills, and where you are in your Linux
+journey. Both can teach you something about Arch, automation, and
+desktop configuration.
+
+
+================================================================================
+END OF REVIEW
+================================================================================
+
+Document prepared by: ArchLinux-Hyprland Expert
+Date: February 15, 2026
+Based on repository analysis of:
+- ArchTitus (ChrisTitusTech/ArchTitus)
+- ML4W Dotfiles (mylinuxforwork/dotfiles)
+
+This document reflects the state of both repositories as of the cloned
+versions in /home/daystoso/ArchStoso/
+
+For latest information:
+- ArchTitus: https://github.com/ChrisTitusTech/ArchTitus (deprecated)
+- LinUtil: https://github.com/ChrisTitusTech/linutil (successor)
+- ML4W Dotfiles: https://github.com/mylinuxforwork/dotfiles
+- ML4W Website: https://ml4w.com/os/

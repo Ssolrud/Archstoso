@@ -1,0 +1,1 @@
+$(cat ~/.config/archstoso/settings/terminal.sh) --class dotfiles-floating -e btop

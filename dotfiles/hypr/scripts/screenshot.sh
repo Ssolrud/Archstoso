@@ -108,26 +108,15 @@ save='Save'
 copy_save='Copy & Save'
 edit='Edit'
 
-# Rofi CMD
-rofi_cmd() {
-    rofi -dmenu -replace -config ~/.config/rofi/config-screenshot.rasi -i -no-show-icons -l 2 -width 30 -p "Take screenshot"
-}
-
-# Pass variables to rofi dmenu
-run_rofi() {
-    echo -e "$option_1\n$option_2" | rofi_cmd
+# Fuzzel dmenu wrappers
+run_menu() {
+    echo -e "$option_1\n$option_2" | fuzzel --dmenu -p "Take screenshot: "
 }
 
 ####
 # Choose Timer
-# CMD
-timer_cmd() {
-    rofi -dmenu -replace -config ~/.config/rofi/config-screenshot.rasi -i -no-show-icons -l 5 -width 30 -p "Choose timer"
-}
-
-# Ask for confirmation
 timer_exit() {
-    echo -e "$option_time_1\n$option_time_2\n$option_time_3\n$option_time_4\n$option_time_5" | timer_cmd
+    echo -e "$option_time_1\n$option_time_2\n$option_time_3\n$option_time_4\n$option_time_5" | fuzzel --dmenu -p "Choose timer: "
 }
 
 # Confirm and execute
@@ -156,14 +145,8 @@ timer_run() {
 
 ####
 # Chose Screenshot Type
-# CMD
-type_screenshot_cmd() {
-    rofi -dmenu -replace -config ~/.config/rofi/config-screenshot.rasi -i -no-show-icons -l 3 -width 30 -p "Type of screenshot"
-}
-
-# Ask for confirmation
 type_screenshot_exit() {
-    echo -e "$option_capture_1\n$option_capture_2\n$option_capture_3" | type_screenshot_cmd
+    echo -e "$option_capture_1\n$option_capture_2\n$option_capture_3" | fuzzel --dmenu -p "Type of screenshot: "
 }
 
 # Confirm and execute
@@ -186,14 +169,8 @@ type_screenshot_run() {
 
 ####
 # Choose to save or copy photo
-# CMD
-copy_save_editor_cmd() {
-    rofi -dmenu -replace -config ~/.config/rofi/config-screenshot.rasi -i -no-show-icons -l 4 -width 30 -p "How to save"
-}
-
-# Ask for confirmation
 copy_save_editor_exit() {
-    echo -e "$copy\n$save\n$copy_save\n$edit" | copy_save_editor_cmd
+    echo -e "$copy\n$save\n$copy_save\n$edit" | fuzzel --dmenu -p "How to save: "
 }
 
 # Confirm and execute
@@ -277,7 +254,7 @@ run_cmd() {
 }
 
 # Actions
-chosen="$(run_rofi)"
+chosen="$(run_menu)"
 case ${chosen} in
     $option_1)
         run_cmd --opt1

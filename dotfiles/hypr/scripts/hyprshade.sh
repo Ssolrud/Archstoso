@@ -17,13 +17,10 @@ if [ -d $HOME/.config/hypr/shaders ]; then
     rm -rf $HOME/.config/hypr/shaders
 fi
 
-if [[ "$1" == "rofi" ]]; then
+if [[ "$1" == "menu" ]]; then
 
-    # Open rofi to select the Hyprshade filter for toggle
     options="$(hyprshade ls | sed 's/^[ *]*//')\noff"
-
-    # Open rofi
-    choice=$(echo -e "$options" | rofi -dmenu -replace -config ~/.config/rofi/config-hyprshade.rasi -i -no-show-icons -l 4 -width 30 -p "Hyprshade")
+    choice=$(echo -e "$options" | fuzzel --dmenu -p "Hyprshade: ")
     if [ ! -z $choice ]; then
         echo "hyprshade_filter=\"$choice\"" >~/.config/archstoso/settings/hyprshade.sh
         if [ "$choice" == "off" ]; then

@@ -134,8 +134,19 @@ case "$1" in
     fi
     restart_listener "$2"
     ;;
+--status)
+    echo "Registered listeners and status:"
+    for key in "${!LISTENERS[@]}"; do
+        script="${LISTENERS[$key]}"
+        if pgrep -f "$script" > /dev/null 2>&1; then
+            echo "  [RUNNING] $key"
+        else
+            echo "  [STOPPED] $key"
+        fi
+    done
+    ;;
 *)
-    echo "Usage: $0 [--startall | --stopall | --restartall | --start <listener_name> | --stop <listener_name> | --restart <listener_name>]"
+    echo "Usage: $0 [--startall | --stopall | --restartall | --status | --start <listener_name> | --stop <listener_name> | --restart <listener_name>]"
     echo ""
     echo "Registered listeners:"
     for key in "${!LISTENERS[@]}"; do

@@ -27,24 +27,19 @@ fi
 # Filter for mapped (visible) and non-hidden windows
 # Format the output for Rofi: "Window Title --HYPRCTL_INFO--<address>--<workspace_id>"
 # This allows Rofi to display the title, but the full string (with address and workspace) is passed on selection.
-rofi_input=$(hyprctl clients -j | jq -r '.[] | select(.mapped == true and .hidden == false) | "\(.title) --HYPRCTL_INFO--\(.address)--\(.workspace.id)"')
+window_list=$(hyprctl clients -j | jq -r '.[] | select(.mapped == true and .hidden == false) | "\(.title) --HYPRCTL_INFO--\(.address)--\(.workspace.id)"')
 
 # Check if there are any windows to display
-if [ -z "$rofi_input" ]; then
+if [ -z "$window_list" ]; then
     echo "No active windows found."
     exit 0
 fi
 
-# Pipe the formatted window list to Rofi
-# -dmenu: Rofi's dmenu mode for selection
-# -i: Case-insensitive searching
-# -p "Active Window": Sets the Rofi prompt
-selected_line=$(echo -e "$rofi_input" | rofi -dmenu -config ~/.config/rofi/config-compact.rasi -no-show-icons -i -p "Active Window")
+selected_line=$(echo -e "$window_list" | fuzzel --dmenu -p "Active Window: ")
 
-# Check if a selection was made (user didn't press Esc or close Rofi)
+# Check if a selection was made (user didn't press Esc)
 if [ -n "$selected_line" ]; then
     # Extract the information we embedded: address and workspace ID
-    # Using awk for more robust parsing of the selected line
     # This extracts everything AFTER the first occurrence of '--HYPRCTL_INFO--'
     info_raw=$(echo "$selected_line" | awk -F '--HYPRCTL_INFO--' '{print $2}')
 

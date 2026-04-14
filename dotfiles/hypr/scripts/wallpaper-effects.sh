@@ -20,11 +20,8 @@ if [ $1 == "reload" ]; then
     # Releod wallpaper with current effect
     waypaper --wallpaper $(cat $cache_file)
 else
-    # Open rofi to select the Hyprshade filter for toggle
     options="$(ls ~/.config/hypr/effects/wallpaper/)\noff"
-
-    # Open rofi
-    choice=$(echo -e "$options" | rofi -dmenu -replace -config ~/.config/rofi/config-themes.rasi -i -no-show-icons -l 5 -width 30 -p "Hyprshade")
+    choice=$(echo -e "$options" | fuzzel --dmenu -p "Wallpaper Effect: ")
     if [ ! -z $choice ]; then
         echo "$choice" >~/.config/archstoso/settings/wallpaper-effect.sh
 

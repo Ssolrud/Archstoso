@@ -46,12 +46,9 @@ else
 fi
 
 argc() { echo $#; }
-rofi_cmd() {
-    rofi -dmenu -replace -config ~/.config/rofi/config-ocr-lang.rasi -i -no-show-icons -l 3 -width 30 -p "Select the OCR language"
-}
 
 if [ "$(argc $OCR_LANGUAGE_LIST)" -gt 1 ]; then
-    OCR_LANGUAGE=$(echo -e "$OCR_LANGUAGE_LIST" | rofi_cmd)
+    OCR_LANGUAGE=$(echo -e "$OCR_LANGUAGE_LIST" | fuzzel --dmenu -p "Select OCR language: ")
     sleep 0.5 || true
 fi
 

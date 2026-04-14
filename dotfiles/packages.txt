@@ -174,7 +174,7 @@ nwg-displays                # [AUR]
 waypaper                    # [AUR]
 
 # Wallpaper daemon
-swww                        # [AUR]
+awww                        # wallpaper daemon (Arch extra, binary renamed from swww — create symlinks: swww-daemon→awww-daemon, swww→awww)
 
 # Power / logout menu
 wlogout                     # [AUR]

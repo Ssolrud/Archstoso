@@ -8,7 +8,7 @@ mkdir -p "$HOME/.config/archstoso/settings"
 
 # Set waybar theme (format: THEME_FOLDER;VARIATION_FOLDER)
 # launch.sh resolves: ~/.config/waybar/themes/modern/  and  ~/.config/waybar/themes/modern/default/
-echo "modern;modern/default" > "$HOME/.config/archstoso/settings/waybar-theme.sh"
+echo "/modern;/modern/default" > "$HOME/.config/archstoso/settings/waybar-theme.sh"
 "$HOME/.config/waybar/launch.sh" &
 
 # Set swaync theme

@@ -315,6 +315,19 @@ else
 fi
 
 # ------------------------------------------------------------------------------
+# Create swww compatibility symlinks (Arch extra ships awww with renamed binaries)
+# ------------------------------------------------------------------------------
+
+_header "Creating swww → awww symlinks"
+
+if _command_exists awww-daemon; then
+    _info "Linking swww-daemon → awww-daemon"
+    sudo ln -sf /usr/bin/awww-daemon /usr/local/bin/swww-daemon
+    sudo ln -sf /usr/bin/awww /usr/local/bin/swww
+else
+    _warn "awww-daemon not found — skipping swww symlinks"
+fi
+
 # Enable elephant user service (Walker data backend)
 # ------------------------------------------------------------------------------
 

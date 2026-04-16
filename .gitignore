@@ -2,5 +2,5 @@
 ArchTitus/
 mylinuxforwork-dotfiles/
 
-# Claude internal files
-.claude/
+# Claude internal files (session data — root level only)
+/.claude/

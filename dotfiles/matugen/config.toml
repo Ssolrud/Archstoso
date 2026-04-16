@@ -18,6 +18,7 @@ post_hook = 'hyprctl reload'
 [templates.waybar]
 input_path = '~/.config/matugen/templates/colors.css'
 output_path = '~/.config/waybar/colors.css'
+post_hook = '~/.config/waybar/launch.sh'
 
 [templates.gtk3]
 input_path = '~/.config/matugen/templates/gtk-colors.css'
@@ -38,6 +39,7 @@ output_path = '~/.config/wlogout/colors.css'
 [templates.swaync]
 input_path = '~/.config/matugen/templates/colors.css'
 output_path = '~/.config/swaync/colors.css'
+post_hook = 'swaync-client -rs'
 
 [templates.walker]
 input_path = '~/.config/matugen/templates/colors.css'

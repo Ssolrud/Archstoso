@@ -39,13 +39,13 @@ apply_theme() {
 
     if [[ "$THEME_PREF" == "1" || "$THEME_PREF" == "true" ]]; then
         echo "Detected dark theme preference (gtk-application-prefer-dark-theme=1/true). Applying dark matugen theme..."
-        $HOME/.local/bin/matugen image "$(cat ~/.cache/archstoso/hyprland-dotfiles/current_wallpaper)"
+        matugen image "$(cat ~/.cache/archstoso/hyprland-dotfiles/current_wallpaper)"
         $HOME/.config/waybar/launch.sh &
         $HOME/.config/hypr/scripts/gtk.sh &
         swaync-client -rs
     elif [[ "$THEME_PREF" == "0" || "$THEME_PREF" == "false" ]]; then
         echo "Detected light theme preference (gtk-application-prefer-dark-theme=0/false). Applying light matugen theme..."
-        $HOME/.local/bin/matugen image "$(cat ~/.cache/archstoso/hyprland-dotfiles/current_wallpaper)" -m "light"
+        matugen image "$(cat ~/.cache/archstoso/hyprland-dotfiles/current_wallpaper)" -m "light"
         $HOME/.config/waybar/launch.sh &
         $HOME/.config/hypr/scripts/gtk.sh &
         swaync-client -rs

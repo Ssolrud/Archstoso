@@ -65,13 +65,13 @@ stop_listener() {
         echo "Listener '$script_name' is not running."
         return 0
     else
-        echo "Found PID(s) for '$script_name': $pid. Sending SIGTERM..."
-        kill "$pid"
+        echo "Found PID(s) for '$script_name': $(echo "$pid" | tr '\n' ' '). Sending SIGTERM..."
+        pkill -f "$script_path"
         # Give it a moment to terminate gracefully
         sleep 1
         if pgrep -f "$script_path" >/dev/null; then
             echo "Listener '$script_name' did not stop gracefully. Sending SIGKILL..."
-            kill -9 "$pid"
+            pkill -9 -f "$script_path"
             echo "Listener '$script_name' forcefully stopped."
         else
             echo "Listener '$script_name' stopped successfully."

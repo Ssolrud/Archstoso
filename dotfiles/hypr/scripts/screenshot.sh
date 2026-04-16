@@ -38,12 +38,14 @@ export GRIMBLAST_EDITOR="$(cat ~/.config/archstoso/settings/screenshot-editor)"
 
 # Quick instant mode: full screen
 take_instant_full() {
-    grim "$NAME" && notify_user \
-        --a "${APP_NAME}" \
-        --i "${NOTIFICATION_ICON}" \
-        --s "Screenshot saved" \
-        --m "$screenshot_folder/$NAME" \
-        --t 1000
+    grim "$NAME" && \
+        convert "$HOME/$NAME" png:- | wl-copy && \
+        notify_user \
+            --a "${APP_NAME}" \
+            --i "${NOTIFICATION_ICON}" \
+            --s "Screenshot saved" \
+            --m "$screenshot_folder/$NAME" \
+            --t 1000
 
     [[ -f "$HOME/$NAME" && -d "$screenshot_folder" && -w "$screenshot_folder" ]] && mv "$HOME/$NAME" "$screenshot_folder/"
 }
@@ -67,12 +69,14 @@ take_instant_area() {
     trap - EXIT
 
     # capture and notify
-    grim -g "$region" "$NAME" && notify_user \
-        --a "${APP_NAME}" \
-        --i "${NOTIFICATION_ICON}" \
-        --s "Screenshot saved" \
-        --m "$screenshot_folder/$NAME" \
-        --t 1000
+    grim -g "$region" "$NAME" && \
+        convert "$HOME/$NAME" png:- | wl-copy && \
+        notify_user \
+            --a "${APP_NAME}" \
+            --i "${NOTIFICATION_ICON}" \
+            --s "Screenshot saved" \
+            --m "$screenshot_folder/$NAME" \
+            --t 1000
     [[ -f "$HOME/$NAME" && -d "$screenshot_folder" && -w "$screenshot_folder" ]] && mv "$HOME/$NAME" "$screenshot_folder/"
 }
 

@@ -305,8 +305,9 @@ window#waybar.empty #window {
  #custom-notification {
     margin: 0px 11px 0px 0px;
     padding: 0px;
-    font-size: 24px;
-    font-family: "Material Icons";
+    font-size: 18px;
+    font-family: "Font Awesome 7 Free";
+    font-weight: 900;
     color: @icon_color;
 }
 

@@ -358,6 +358,15 @@ if ! _command_exists oh-my-posh; then
 fi
 
 # ------------------------------------------------------------------------------
+# Create required user directories
+# ------------------------------------------------------------------------------
+
+_header "Creating user directories"
+_run mkdir -p "${HOME}/wallpaper"
+_run mkdir -p "${HOME}/Pictures"
+_info "User directories ready."
+
+# ------------------------------------------------------------------------------
 # Backup existing ~/.config directories
 # ------------------------------------------------------------------------------
 
@@ -388,6 +397,7 @@ config_dirs=(
 config_files=(
     "chromium-flags.conf"
     "edge-flags.conf"
+    "kdeglobals"
 )
 
 backup_needed=false

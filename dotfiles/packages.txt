@@ -154,6 +154,7 @@ walker-bin                  # [AUR]
 elephant-desktopapplications      # [AUR] - scans .desktop files for Walker app list
 elephant-websearch                # [AUR] - websearch provider used in config.toml
 elephant-providerlist             # [AUR] - providerlist provider used in config.toml
+elephant-clipboard                # [AUR] - clipboard history provider for Walker
 
 # Color scheme generator
 matugen-bin                 # [AUR]

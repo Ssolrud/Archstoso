@@ -138,7 +138,7 @@
     "on-click": "qalculate-gtk",
     "tooltip-format": "Open calculator"
   },
-  // Rofi Application Launcher
+  // Application Launcher
   "custom/appmenu": {
     // START APPS LABEL
     "format": "Apps",
@@ -147,10 +147,10 @@
     "on-click-right": "~/.config/hypr/scripts/keybindings.sh",
     "tooltip-format": "Left: Open the application launcher\nRight: Show all keybindings"
   },
-  // Rofi Application Launcher
+  // Application Launcher Icon
   "custom/appmenuicon": {
     "format": "",
-    "on-click": "sleep 0.2;rofi -show drun -replace",
+    "on-click": "~/.config/hypr/scripts/launcher.sh",
     "on-click-right": "~/.config/hypr/scripts/keybindings.sh",
     "tooltip-format": "Left: Open the application launcher\nRight: Show all keybindings"
   },
@@ -166,14 +166,14 @@
     "tooltip-format": "Left: Notifications\nRight: Do not disturb",
     "format": "{icon}",
     "format-icons": {
-      "notification": "notifications_active",
-      "none": "notifications",
-      "dnd-notification": "notifications_active",
-      "dnd-none": "notifications_paused",
-      "inhibited-notification": "notification_important",
-      "inhibited-none": "notification_important",
-      "dnd-inhibited-notification": "notification_off",
-      "dnd-inhibited-none": "notifications_off"
+      "notification": "\uf0f3",
+      "none": "\uf0f3",
+      "dnd-notification": "\uf1f6",
+      "dnd-none": "\uf1f6",
+      "inhibited-notification": "\uf0f3",
+      "inhibited-none": "\uf0f3",
+      "dnd-inhibited-notification": "\uf1f6",
+      "dnd-inhibited-none": "\uf1f6"
     },
     "return-type": "json",
     "exec-if": "which swaync-client",

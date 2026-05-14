@@ -1,0 +1,30 @@
+graph TD
+    SESS["Hyprland session start"]
+    AUTO["autostart.conf — exec-once entries"]
+
+    SESS --> AUTO
+
+    AUTO --> LIST["listeners.sh --startall"]
+    LIST --> GTKL["gtk-theme-switcher.sh — dbus listener"]
+    LIST --> BATL["low-bat-notification.sh — upower listener"]
+
+    AUTO --> SWWW["swww-daemon — awww wallpaper engine"]
+
+    AUTO --> WPR["wallpaper-restore.sh — sleep 2 then waypaper"]
+    WPR -->|uses| SWWW
+
+    AUTO --> WBLAUNCH["waybar/launch.sh"]
+    WBLAUNCH -->|reads| WBTHEME["settings/waybar-theme.sh"]
+    WBTHEME -->|modern| WBMOD["themes/modern/"]
+    WBTHEME -->|minimal| WBMIN["themes/minimal/"]
+
+    AUTO --> SWAYNC["swaync — notification daemon"]
+    AUTO --> GTK["hypr/scripts/gtk.sh — applies GTK theme"]
+    AUTO --> HYPRIDLE["hypridle — idle timeout to hyprlock"]
+    AUTO --> CLIP["wl-paste | cliphist store — clipboard history"]
+    AUTO --> ASAUTO["archstoso-autostart — user app autostart list"]
+    AUTO --> CLEAN["hypr/scripts/cleanup.sh — removes stale lock files"]
+
+    style SESS fill:#2d5bff,color:#fff
+    style AUTO fill:#2d5bff,color:#fff
+    style SWWW fill:#444,color:#fff

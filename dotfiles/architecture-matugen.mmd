@@ -1,0 +1,31 @@
+graph LR
+    WPF["wallpaper file"]
+    WPS["wallpaper.sh"]
+    MAT["matugen — config.toml"]
+
+    WPF --> WPS
+    WPS -->|matugen image| MAT
+
+    MAT -->|template + hyprctl reload| HYPC["hypr/colors.conf"]
+    MAT -->|template + SIGUSR1| KITTYC["kitty/colors-matugen.conf"]
+    MAT -->|template + waybar relaunch| WAYC["waybar/colors.css"]
+    MAT -->|template| GTK3["gtk-3.0/colors.css"]
+    MAT -->|template| GTK4["gtk-4.0/colors.css"]
+    MAT -->|template + USR2| BTOPC["btop/themes/matugen.theme"]
+    MAT -->|template| SWAYNC["swaync/colors.css"]
+    MAT -->|template| WLOGC["wlogout/colors.css"]
+    MAT -->|template| WALKC["walker/colors.css"]
+
+    HYPC --> HYPR["Hyprland"]
+    HYPC -->|source| LOCK["hyprlock.conf"]
+    KITTYC --> KITTY["Kitty terminal"]
+    WAYC --> WAYBAR["Waybar"]
+    GTK3 --> GTK3A["GTK3 apps"]
+    GTK4 --> GTK4A["GTK4 apps"]
+    BTOPC --> BTOP["btop"]
+    SWAYNC --> NOTIF["SwayNC"]
+    WLOGC --> WLOG["wlogout"]
+    WALKC --> WALK["Walker"]
+
+    style MAT fill:#2d5bff,color:#fff
+    style WPS fill:#2d5bff,color:#fff

@@ -1,0 +1,32 @@
+graph TD
+    HY["hyprland.conf (entry point)"]
+
+    HY -->|source| CORE["conf/core.conf"]
+    HY -->|source| ENV["conf/environment.conf"]
+    HY -->|source| COL["colors.conf — matugen generated"]
+    HY -->|source| AUTO["conf/autostart.conf"]
+    HY -->|source| APP["conf/appearance.conf"]
+    HY -->|source| KB["conf/keybindings.conf"]
+    HY -->|source| WR["conf/windowrules.conf"]
+    HY -->|source| CUST["conf/custom.conf — user overrides"]
+
+    CORE -->|source| NWG["monitors/nwg-displays.conf"]
+    NWG -->|source| MONC["monitors.conf — stub / nwg-displays generated"]
+    NWG -->|source| WSC["workspaces.conf — stub / nwg-displays generated"]
+    CORE -->|source| LAY["layouts/default.conf — laptop also available"]
+    CORE -->|source| WSR["workspaces/default.conf"]
+
+    ENV -->|source| ENVD["environments/default.conf — nvidia / kvm also available"]
+
+    APP -->|source| DEC["decorations/default.conf — blur / no-blur / rounding / gamemode ..."]
+    APP -->|source| WIN["windows/default.conf — border-1..4 / glass / transparent / gamemode ..."]
+    APP -->|source| ANIM["animations/default.conf — fast / smooth / dynamic / classic / disabled ..."]
+
+    KB  -->|source| KBD["keybindings/default.conf — fr also available"]
+    WR  -->|source| WRD["windowrules/default.conf"]
+
+    LOCK["hyprlock.conf"] -->|source| COL
+
+    style COL fill:#2d5bff,color:#fff
+    style CUST fill:#e07800,color:#fff
+    style LOCK fill:#444,color:#fff

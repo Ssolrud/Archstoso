@@ -8,7 +8,8 @@
 # Usage:
 #   ./install.sh [--dry-run]
 #
-#   --dry-run   Show what would be done without making any changes.
+#   --dry-run              Show what would be done without making any changes.
+#   ARCHSTOSO_UNATTENDED=1 Skip all interactive prompts (used by the installer).
 # ==============================================================================
 
 set -euo pipefail
@@ -30,6 +31,7 @@ BOLD='\033[1m'
 NONE='\033[0m'
 
 DRY_RUN=false
+UNATTENDED="${ARCHSTOSO_UNATTENDED:-0}"
 
 # ------------------------------------------------------------------------------
 # Helpers
@@ -85,7 +87,7 @@ done
 # Header
 # ------------------------------------------------------------------------------
 
-clear
+[[ "$UNATTENDED" != "1" ]] && clear
 echo -e "${GREEN}"
 cat <<'EOF'
     ___              __   ______
@@ -164,12 +166,17 @@ _install_paru() {
 }
 
 if _command_exists yay && _command_exists paru; then
-    echo "Both yay and paru are installed."
-    read -r -p "Which AUR helper should be used? [yay/paru] (default: yay): " choice
-    case "${choice}" in
-        paru) AUR_HELPER="paru" ;;
-        *)    AUR_HELPER="yay"  ;;
-    esac
+    if [[ "$UNATTENDED" == "1" ]]; then
+        AUR_HELPER="yay"
+        _info "Unattended mode: using yay"
+    else
+        echo "Both yay and paru are installed."
+        read -r -p "Which AUR helper should be used? [yay/paru] (default: yay): " choice
+        case "${choice}" in
+            paru) AUR_HELPER="paru" ;;
+            *)    AUR_HELPER="yay" ;;
+        esac
+    fi
 elif _command_exists yay; then
     AUR_HELPER="yay"
     _info "Using AUR helper: yay"
@@ -178,14 +185,20 @@ elif _command_exists paru; then
     _info "Using AUR helper: paru"
 else
     _warn "No AUR helper found."
-    echo
-    echo "An AUR helper is required to install AUR packages."
-    echo "Options:"
-    echo "  1) Install yay (default)"
-    echo "  2) Install paru"
-    echo "  3) Cancel"
-    echo
-    read -r -p "Choice [1/2/3]: " aur_choice
+    aur_choice=""
+    if [[ "$UNATTENDED" == "1" ]]; then
+        aur_choice="1"   # always pick yay in unattended mode
+        _info "Unattended mode: will install yay"
+    else
+        echo
+        echo "An AUR helper is required to install AUR packages."
+        echo "Options:"
+        echo "  1) Install yay (default)"
+        echo "  2) Install paru"
+        echo "  3) Cancel"
+        echo
+        read -r -p "Choice [1/2/3]: " aur_choice
+    fi
     case "${aur_choice}" in
         2)
             if [[ "${DRY_RUN}" == true ]]; then
@@ -207,7 +220,7 @@ else
             _info "Installation cancelled."
             exit 0
             ;;
-        *)
+        1|*)
             if [[ "${DRY_RUN}" == true ]]; then
                 _dryrun "Would install yay from AUR."
                 AUR_HELPER="yay"
@@ -336,7 +349,9 @@ _header "Enabling elephant service"
 if _command_exists elephant; then
     _info "Enabling elephant systemd user service..."
     _run elephant service enable
-    _run systemctl --user start elephant.service
+    # systemctl --user start fails in a chroot (no D-Bus session); best-effort only
+    _run systemctl --user start elephant.service 2>/dev/null || \
+        _warn "Could not start elephant.service — it will start on first login"
 else
     _warn "elephant not found — skipping service setup. Install elephant and run: elephant service enable"
 fi
@@ -498,10 +513,10 @@ _append_env_if_missing() {
     fi
 }
 
-_append_env_if_missing "BROWSER"      "firefox"    "Default browser"
+_append_env_if_missing "BROWSER"      "brave"      "Default browser"
 _append_env_if_missing "TERMINAL"     "kitty"      "Default terminal"
 _append_env_if_missing "EDITOR"       "nvim"       "Default editor"
-_append_env_if_missing "FILE_MANAGER" "nautilus"   "Default file manager"
+_append_env_if_missing "FILE_MANAGER" "thunar"     "Default file manager"
 
 # Source the modular bashrc configs if not already done
 if ! grep -q "\.config/bashrc" "${BASHRC}" 2>/dev/null; then

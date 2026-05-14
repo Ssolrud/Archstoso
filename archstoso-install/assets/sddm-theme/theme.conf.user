@@ -1,0 +1,4 @@
+[General]
+# Font size used for body text in the theme.
+# Increase if running on a HiDPI display without display scaling.
+fontSize = 11

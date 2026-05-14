@@ -1,0 +1,34 @@
+# aur.txt — AUR packages for HYPRLAND install type.
+# Consumed by 2-user.sh via yay. One package per line; lines starting with # are ignored.
+# All packages here require yay (bootstrapped in 2-user.sh).
+
+# Browser
+brave-bin
+
+# App launcher + elephant data providers (Walker backend)
+walker-bin
+elephant-desktopapplications
+elephant-websearch
+elephant-providerlist
+elephant-clipboard
+
+# Color scheme generator (material-you)
+matugen-bin
+
+# Shell prompt
+oh-my-posh-bin
+
+# Screenshot helper (wraps grim+slurp with Hyprland window awareness)
+grimblast-git
+
+# Hyprland shader tool
+hyprshade
+
+# Display layout GUI
+nwg-displays
+
+# Wallpaper GUI frontend
+waypaper
+
+# Power / logout menu
+wlogout

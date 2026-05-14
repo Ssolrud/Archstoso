@@ -1,0 +1,88 @@
+# hyprland.txt — Installed for HYPRLAND install type only (pacman packages).
+# Consumed by 1-setup.sh after base.txt. One package per line; lines starting with # are ignored.
+# AUR packages are in aur.txt — do not add [AUR] packages here.
+
+# Hyprland + Wayland session
+hyprland
+uwsm
+xdg-desktop-portal-hyprland
+xdg-desktop-portal-gtk
+qt5-wayland
+qt6-wayland
+libnotify
+polkit-gnome
+
+# Hyprland ecosystem
+hyprlock
+hypridle
+hyprpicker
+
+# Login manager
+sddm
+
+# Status bar
+waybar
+
+# Terminal
+kitty
+
+# File manager
+thunar
+
+# Notification daemon
+swaync
+
+# Screenshot tools
+grim
+slurp
+fuzzel
+
+# Clipboard
+cliphist
+wl-clipboard
+
+# Brightness control
+brightnessctl
+
+# Audio mixer
+pavucontrol
+
+# Network management GUI
+nm-connection-editor
+network-manager-applet
+
+# File manager support
+gvfs
+gvfs-mtp
+udisks2
+udiskie
+tumbler
+
+# GTK / Qt theming
+nwg-look
+gnome-themes-extra
+breeze
+qt6ct
+qt6-svg
+
+# Fonts
+ttf-font-awesome
+otf-font-awesome
+ttf-fira-sans
+ttf-firacode-nerd
+ttf-jetbrains-mono-nerd
+
+# System info
+fastfetch
+
+# Image viewer
+loupe
+
+# Wallpaper daemon (Arch extra — binaries are awww/awww-daemon, symlinked to swww/swww-daemon by 1-setup.sh)
+awww
+
+# Miscellaneous utilities
+figlet
+imagemagick
+python-gobject
+python-pip

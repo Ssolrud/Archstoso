@@ -1,0 +1,42 @@
+# base.txt — Installed on all systems regardless of install type (BASE or HYPRLAND).
+# Consumed by 1-setup.sh. One package per line; lines starting with # are ignored.
+# Note: base, base-devel, linux, linux-firmware, networkmanager, git, curl, wget
+# are already pacstrapped — they are listed here so --needed makes them a no-op and
+# the list stays self-documenting.
+
+# Core build tools
+base-devel
+git
+curl
+wget
+rsync
+unzip
+tar
+
+# Shell utilities
+jq
+fzf
+inotify-tools
+pacman-contrib
+
+# User directories
+xdg-user-dirs
+xdg-utils
+
+# Network
+networkmanager
+
+# Audio
+pipewire
+pipewire-alsa
+pipewire-pulse
+wireplumber
+
+# Bluetooth
+blueman
+
+# Editor
+neovim
+
+# System monitor
+btop

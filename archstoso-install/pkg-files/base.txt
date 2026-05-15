@@ -33,7 +33,14 @@ pipewire-pulse
 wireplumber
 
 # Bluetooth
+bluez
+bluez-utils
 blueman
+
+# Printing
+cups
+avahi
+nss-mdns
 
 # Editor
 neovim

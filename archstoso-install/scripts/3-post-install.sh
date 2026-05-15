@@ -177,13 +177,14 @@ EOF
 _step6_services() {
     step 6 9 "Enabling system services"
 
-    # Unconditional: these make sense on any desktop system.
-    systemctl enable bluetooth.service
-    systemctl enable cups.service
-    systemctl enable cups.socket
-    systemctl enable avahi-daemon.service
+    # Enable each service only if its unit exists (package may not be installed on BASE).
+    _try_enable() { systemctl enable "$1" 2>/dev/null && ok "$1 enabled" || warn "$1 not found — skipping"; }
+
+    _try_enable bluetooth.service
+    _try_enable cups.service
+    _try_enable cups.socket
+    _try_enable avahi-daemon.service
     systemctl enable systemd-timesyncd.service
-    ok "bluetooth, cups, avahi-daemon, systemd-timesyncd enabled"
 
     # fstrim: only beneficial on SSDs; spinning disks have no TRIM command.
     local disk_basename

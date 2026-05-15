@@ -90,7 +90,7 @@ _step6_pacstrap() {
         linux linux-firmware linux-headers
         networkmanager
         sudo git curl wget
-        systemd-zram-generator   # zram swap (configured in step 8)
+        zram-generator   # zram swap (configured in step 8)
     )
 
     [[ -n "${MICROCODE_PKG:-}" ]] && PACSTRAP_PKGS+=("$MICROCODE_PKG")

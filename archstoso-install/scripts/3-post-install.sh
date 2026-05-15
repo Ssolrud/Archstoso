@@ -185,6 +185,7 @@ _step6_services() {
     _try_enable cups.socket
     _try_enable avahi-daemon.service
     systemctl enable systemd-timesyncd.service
+    ok "systemd-timesyncd enabled"
 
     # fstrim: only beneficial on SSDs; spinning disks have no TRIM command.
     local disk_basename

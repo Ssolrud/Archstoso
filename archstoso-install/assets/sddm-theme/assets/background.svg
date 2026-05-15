@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1920" height="1080" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+
+    <!-- Deep neon glow — logo -->
+    <filter id="logoGlow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3"  result="b1"/>
+      <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="b2"/>
+      <feGaussianBlur in="SourceGraphic" stdDeviation="30" result="b3"/>
+      <feMerge>
+        <feMergeNode in="b3"/>
+        <feMergeNode in="b2"/>
+        <feMergeNode in="b1"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Softer glow — text -->
+    <filter id="textGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="5"  result="b1"/>
+      <feGaussianBlur in="SourceGraphic" stdDeviation="18" result="b2"/>
+      <feMerge>
+        <feMergeNode in="b2"/>
+        <feMergeNode in="b1"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Faint glow — decorative lines -->
+    <filter id="lineGlow" x="-10%" y="-200%" width="120%" height="500%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="b1"/>
+      <feMerge>
+        <feMergeNode in="b1"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Background: radial blue tint in upper area, pure black at edges -->
+    <radialGradient id="bgGrad" cx="50%" cy="28%" r="55%">
+      <stop offset="0%"   stop-color="#000e1f"/>
+      <stop offset="55%"  stop-color="#00060f"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </radialGradient>
+
+    <!-- Scanline pattern -->
+    <pattern id="scanlines" x="0" y="0" width="2" height="4" patternUnits="userSpaceOnUse">
+      <rect y="0" width="2" height="1" fill="#001833" opacity="0.25"/>
+    </pattern>
+
+  </defs>
+
+  <!-- ── Background layers ── -->
+  <rect width="1920" height="1080" fill="#000000"/>
+  <rect width="1920" height="1080" fill="url(#bgGrad)"/>
+  <rect width="1920" height="1080" fill="url(#scanlines)"/>
+
+  <!-- ── Subtle concentric rings behind logo ── -->
+  <circle cx="960" cy="260" r="280" fill="none" stroke="#003366" stroke-width="1" opacity="0.30"/>
+  <circle cx="960" cy="260" r="360" fill="none" stroke="#002244" stroke-width="1" opacity="0.22"/>
+  <circle cx="960" cy="260" r="440" fill="none" stroke="#001833" stroke-width="1" opacity="0.15"/>
+
+  <!-- ── Arch Linux logo ──────────────────────────────────
+       Two isoceles triangles with fill-rule evenodd.
+       Bounding box: 500×500 units, scaled 0.66 → ~330 px tall
+       Centered horizontally, top at y=50.
+  ─────────────────────────────────────────────────────── -->
+  <path
+    fill-rule="evenodd"
+    fill="#00cfff"
+    filter="url(#logoGlow)"
+    transform="translate(795, 50) scale(0.66)"
+    d="M 250,0
+       L 0,500
+       L 500,500
+       Z
+       M 250,105
+       L 128,472
+       L 372,472
+       Z"
+  />
+
+  <!-- ── Primary title ── -->
+  <text
+    x="960" y="440"
+    text-anchor="middle"
+    fill="#00cfff"
+    font-family="monospace, 'Courier New', sans-serif"
+    font-size="82"
+    font-weight="bold"
+    letter-spacing="10"
+    filter="url(#textGlow)"
+  >ArchStoso</text>
+
+  <!-- ── Subtitle ── -->
+  <text
+    x="960" y="496"
+    text-anchor="middle"
+    fill="#005a8a"
+    font-family="monospace, 'Courier New', sans-serif"
+    font-size="20"
+    letter-spacing="6"
+  >ARCH LINUX  ·  HYPRLAND</text>
+
+  <!-- ── Decorative horizontal rule ── -->
+  <line x1="680" y1="518" x2="1240" y2="518"
+        stroke="#00cfff" stroke-width="1" opacity="0.35"
+        filter="url(#lineGlow)"/>
+
+  <!-- ── Corner accents (top-left / bottom-right) ── -->
+  <polyline points="40,80 40,40 80,40"
+            fill="none" stroke="#003d5c" stroke-width="1.5" opacity="0.6"/>
+  <polyline points="1840,1000 1840,1040 1800,1040"
+            fill="none" stroke="#003d5c" stroke-width="1.5" opacity="0.6"/>
+
+</svg>

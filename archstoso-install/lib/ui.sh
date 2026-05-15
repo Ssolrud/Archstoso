@@ -189,8 +189,8 @@ select_option() {
             read -rsn2 -t 0.1 key
         fi
         case "$key" in
-            '[A'|'k') (( current > 0 ))          && (( current-- )) ;;
-            '[B'|'j') (( current < num - 1 ))    && (( current++ )) ;;
+            '[A'|'k') (( current > 0 ))          && (( current -= 1 )) || true ;;
+            '[B'|'j') (( current < num - 1 ))    && (( current += 1 )) || true ;;
             '')  # Enter
                 _cursor_show
                 trap - INT

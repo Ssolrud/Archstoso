@@ -1,1 +1,1 @@
-modern;modern/default
+/modern;/modern/default

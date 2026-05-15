@@ -294,22 +294,20 @@ bash "$SCRIPT_DIR/scripts/0-preinstall.sh"
 # Copy the entire installer tree into the new root before chrooting.
 # Phase scripts source setup.conf from /root/archstoso-install/configs/.
 cp -r "$SCRIPT_DIR" /mnt/root/archstoso-install
-# /root/ is mode 700 — the target user can't read files there.
-# Make the installer tree world-readable so sudo -u $USERNAME can execute scripts.
-chmod -R o+rX /mnt/root/archstoso-install
 
 section "Phase 1: System Setup"
+# Runs as root. Step 15 copies the installer to /home/$USERNAME/archstoso-install.
 arch-chroot /mnt /root/archstoso-install/scripts/1-setup.sh
 
 section "Phase 2: User Setup"
-# Run as the target user so that home-directory paths resolve correctly.
-# env -i gives a clean environment; sudo -u drops privileges for the script.
+# Runs as $USERNAME from their home dir (copied by phase 1 step 15).
+# /root/ is 700 so sudo -u can't traverse it — use the home-dir copy instead.
 arch-chroot /mnt /usr/bin/env -i \
     HOME="/home/${USERNAME}" \
     USER="${USERNAME}" \
     LOGNAME="${USERNAME}" \
     sudo -u "${USERNAME}" \
-    /root/archstoso-install/scripts/2-user.sh
+    "/home/${USERNAME}/archstoso-install/scripts/2-user.sh"
 
 section "Phase 3: Post-Install"
 arch-chroot /mnt /root/archstoso-install/scripts/3-post-install.sh

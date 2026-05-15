@@ -4,8 +4,39 @@
 # Expects these variables set from setup.conf before any function is called:
 #   DISK, FS_TYPE, LUKS, LUKS_PASSWORD (only when LUKS=yes)
 
+# ── Force-unmount everything on the target disk ───────────────────────────────
+# Live ISOs auto-mount partitions via udev/udisks. We must clear them before
+# sgdisk or mkfs can write to the disk.
+_unmount_disk() {
+    local disk="$1"
+
+    # Unmount /mnt tree first (previous failed attempt may have left it mounted)
+    umount -R /mnt 2>/dev/null || true
+
+    # Deactivate any swap on this disk
+    swapoff -a 2>/dev/null || true
+
+    # Close any LUKS containers whose backing device is on this disk
+    while IFS= read -r name; do
+        local backing
+        backing=$(cryptsetup status "$name" 2>/dev/null | awk '/device:/{print $2}') || true
+        if [[ "$backing" == "${disk}"* ]]; then
+            cryptsetup close "$name" 2>/dev/null || true
+        fi
+    done < <(dmsetup ls 2>/dev/null | awk '{print $1}')
+
+    # Unmount every partition on the disk
+    while IFS= read -r part; do
+        [[ "$part" == "$disk" ]] && continue
+        umount -R "$part" 2>/dev/null || true
+    done < <(lsblk -lnpo NAME "$disk" 2>/dev/null)
+}
+
 # ── Partition the disk ─────────────────────────────────────────────────────────
 partition_disk() {
+    info "Unmounting any existing filesystems on ${DISK}..."
+    _unmount_disk "$DISK"
+
     info "Wiping all partition data on ${DISK}..."
     sgdisk -Z "$DISK"
 

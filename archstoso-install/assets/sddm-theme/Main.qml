@@ -2,8 +2,8 @@
 // Compatible with SDDM 0.21+ / Qt 6
 // Color palette derived from ArchStoso Matugen theme seed.
 
-import QtQuick
-import QtQuick.Controls
+import QtQuick 2.15
+import QtQuick.Controls 2.15
 import SddmComponents 2.0
 
 Rectangle {

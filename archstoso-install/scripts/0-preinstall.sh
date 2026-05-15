@@ -42,22 +42,29 @@ _step3_parallel_downloads() {
 
 _step4_mirrors() {
     step 4 9 "Selecting fastest mirrors with reflector"
-    pacman -S --noconfirm --needed reflector rsync
+    # Force-reinstall: live ISOs sometimes ship a broken reflector Python env
+    # that pacman -S --needed skips over.
+    pacman -S --noconfirm reflector rsync
 
-    # Attempt GeoIP country detection for a tighter regional filter.
     local iso
     iso=$(curl -s --max-time 10 https://ipapi.co/country/ 2>/dev/null || true)
 
+    local reflector_ok=true
     if [[ -n "$iso" ]]; then
         info "Country: ${iso} — filtering mirrors by country"
         reflector -a 48 -c "$iso" -f 5 -l 20 --sort rate \
-            --save /etc/pacman.d/mirrorlist
+            --save /etc/pacman.d/mirrorlist || reflector_ok=false
     else
         info "Country: unknown — using global mirrors"
         reflector -a 48 -f 5 -l 20 --sort rate \
-            --save /etc/pacman.d/mirrorlist
+            --save /etc/pacman.d/mirrorlist || reflector_ok=false
     fi
-    ok "Mirror list updated"
+
+    if $reflector_ok; then
+        ok "Mirror list updated"
+    else
+        warn "reflector failed — continuing with ISO default mirrorlist"
+    fi
 }
 
 _step5_microcode() {

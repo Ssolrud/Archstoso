@@ -29,6 +29,8 @@ qt5-wayland
 qt6-wayland
 libnotify
 polkit-gnome
+polkit-kde-agent
+xdg-utils
 
 # ------------------------------------------------------------------
 # Hyprland ecosystem (pacman)
@@ -81,8 +83,11 @@ brightnessctl
 pipewire
 pipewire-alsa
 pipewire-pulse
+pipewire-jack
 wireplumber
 pavucontrol
+gst-plugin-pipewire
+sof-firmware
 
 # ------------------------------------------------------------------
 # Network (pacman)
@@ -91,10 +96,14 @@ networkmanager
 nm-connection-editor
 network-manager-applet
 iw
+iwd
+wireless_tools
 
 # ------------------------------------------------------------------
 # Bluetooth (pacman)
 # ------------------------------------------------------------------
+bluez
+bluez-utils
 blueman
 
 # ------------------------------------------------------------------
@@ -135,6 +144,7 @@ fastfetch
 # Editor (pacman)
 # ------------------------------------------------------------------
 neovim
+vim
 
 # ------------------------------------------------------------------
 # Image viewer (pacman)
@@ -150,6 +160,8 @@ imagemagick
 python-gobject
 python-pip
 pacman-contrib
+zram-generator
+sddm
 
 # ------------------------------------------------------------------
 # AUR packages — installed via yay/paru

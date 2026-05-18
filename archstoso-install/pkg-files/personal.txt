@@ -1,0 +1,49 @@
+# ArchStoso Personal Packages
+# Groups are used by personal-install.sh to present interactive selection.
+# Format: GROUP:package-name[:aur]
+# Lines beginning with '#' are ignored.
+
+# Gaming
+GAMING:steam
+GAMING:protonup-qt
+GAMING:gamemode
+GAMING:lib32-gamemode
+GAMING:mangohud
+GAMING:lib32-mangohud
+
+# NVIDIA (for Optimus/hybrid GPU setups)
+NVIDIA:nvidia-open-dkms
+NVIDIA:nvidia-prime
+NVIDIA:lib32-nvidia-utils
+NVIDIA:libva-nvidia-driver
+
+# Vulkan & 32-bit Mesa (required for Steam/gaming)
+VULKAN:lib32-mesa
+VULKAN:lib32-vulkan-icd-loader
+VULKAN:lib32-vulkan-intel
+VULKAN:vulkan-intel
+VULKAN:mesa-utils
+
+# Media
+MEDIA:vlc
+MEDIA:kodi
+MEDIA:kodi-addon-pvr-iptvsimple
+MEDIA:yt-dlp
+
+# Communication
+COMMUNICATION:discord
+
+# Development
+DEVELOPMENT:code
+DEVELOPMENT:nodejs
+DEVELOPMENT:npm
+DEVELOPMENT:github-cli
+
+# Virtualisation
+VIRT:qemu-full
+VIRT:edk2-ovmf
+
+# Utilities
+UTILS:htop
+UTILS:smartmontools
+UTILS:sshpass

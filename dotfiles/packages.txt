@@ -90,6 +90,7 @@ pavucontrol
 networkmanager
 nm-connection-editor
 network-manager-applet
+iw
 
 # ------------------------------------------------------------------
 # Bluetooth (pacman)

@@ -556,6 +556,13 @@ if ! systemctl is-active --quiet NetworkManager 2>/dev/null; then
     _run sudo systemctl enable --now NetworkManager
 fi
 
+_info "Deploying NetworkManager wifi power-save config..."
+_run sudo mkdir -p /etc/NetworkManager/conf.d
+_run sudo cp "${SCRIPT_DIR}/NetworkManager/conf.d/wifi-power-save.conf" /etc/NetworkManager/conf.d/wifi-power-save.conf
+if systemctl is-active --quiet NetworkManager 2>/dev/null; then
+    _run sudo systemctl reload NetworkManager
+fi
+
 # ------------------------------------------------------------------------------
 # Make archstoso scripts executable
 # ------------------------------------------------------------------------------
